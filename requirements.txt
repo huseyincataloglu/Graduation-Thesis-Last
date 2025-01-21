@@ -1,0 +1,22 @@
+Required Libraries :
+1.pandas 
+2.plotly 
+3.streamlit
+
+-First install these python libraries using pip package management
+
+
+Type these in your command line respectively:
+
+ pip install pandas
+
+ pip install plotly
+
+ pip install streamlit
+
+-It is enough to compile just app.py and  type this in your command line:
+
+streamlit run <path_to_your_app>/app.py
+
+
+

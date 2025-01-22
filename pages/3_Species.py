@@ -8,13 +8,12 @@ from app import df
 #Sidebar configurations --------------
 st.sidebar.title("All Filters")
 st.sidebar.divider()
-species = st.sidebar.multiselect("Choose species : ",ut.get_total_features(df,"Species"))
+species = st.sidebar.multiselect("Choose species : ",ut.get_uniquefeature(df,"Species"))
 st.sidebar.divider()
 years = st.sidebar.slider("Choose the range of years :",min_value=1950,max_value=2018,value=(1950,2018),step=1)
 st.sidebar.divider()
 detail =st.sidebar.multiselect("Choose the production methods : ",ut.get_production_detailsby_species(df,species,years)) 
 #Sidebar configurations -------------
-
 
 st.markdown("<h1 style='text-align: left;color:red;'>Specy Based Analyses 🐟</h1>",unsafe_allow_html=True)
 

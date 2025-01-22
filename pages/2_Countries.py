@@ -60,7 +60,7 @@ with c2:
 st.sidebar.title("All Filters")
 st.sidebar.divider()
 
-countries = st.sidebar.multiselect("Select Countries",ut.get_unique_features_byanotherfeature(df,"Country"))
+countries = st.sidebar.multiselect("Select Countries",ut.get_uniquefeature(df,"Country"))
 st.sidebar.divider()
 years = st.sidebar.slider("Choose the range to filter",min_value=1950,max_value=2018,step=1,value=(1950,2018))
 st.sidebar.divider()

@@ -5,7 +5,7 @@ def get_total_features(df,variable):
     return df[variable].nunique()
 
 
-def get_unique_features_byanotherfeature(df,main_feature):
+def get_uniquefeature(df,main_feature):
     years = df.columns[4:]
     topproduction_byfeature= df.groupby(main_feature)[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
     return topproduction_byfeature[main_feature].values

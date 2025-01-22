@@ -5,29 +5,46 @@ from modules import utilities as ut
 from modules import speciesvizualition as speciesviz
 from app import df
 
-#Sidebar configurations -- ---- -- -
-species = st.sidebar.multiselect("Choose species : ",ut.get_unique_features(df,"Species"))
+#Sidebar configurations --------------
+st.sidebar.title("All Filters")
+st.sidebar.divider()
+species = st.sidebar.multiselect("Choose species : ",ut.get_total_features(df,"Species"))
 st.sidebar.divider()
 years = st.sidebar.slider("Choose the range of years :",min_value=1950,max_value=2018,value=(1950,2018),step=1)
 st.sidebar.divider()
 detail =st.sidebar.multiselect("Choose the production methods : ",ut.get_production_detailsby_species(df,species,years)) 
-#Sidebar configurations -- ---- -- -
+#Sidebar configurations -------------
 
 
 st.markdown("<h1 style='text-align: left;color:red;'>Specy Based Analyses 🐟</h1>",unsafe_allow_html=True)
-st.markdown(
-    """
-    <h2 style="font-size:24px;">Welcome to the <strong style="color:red;">Specy Page</strong>!</h2>
-    <p style="font-size:20px;">Here you can explore:</p>
-    <ul style="font-size:18px;">
-        <li>Total productions by species and differences between them</li>
-        <li>Production change based on a specific species for variety years</li>
-        <li>Compare production methods for different species</li>
-    </ul>
-    <p style="font-size:18px;">Use the sidebar to select species and methods to customize your analysis and once you choose the species and the range of years, it will effect all the graphs!</p>
-    """, 
-    unsafe_allow_html=True
-)
+
+cl1,cl2 = st.columns(2)
+with cl1:
+    st.markdown(
+        """
+        <h2 style="font-size:24px;">Welcome to the <strong style="color:red;">Specy Page</strong>!</h2>
+        <p style="font-size:20px;">Here you can explore:</p>
+        <ul style="font-size:18px;">
+            <li>Total productions by species and differences between them</li>
+            <li>Production change based on a specific species for variety years</li>
+            <li>Compare production methods for different species</li>
+        </ul>
+        <p style="font-size:18px;">Use the sidebar to select species and methods to customize your analysis and once you choose the species and the range of years, it will effect all the graphs!</p>
+        """, 
+        unsafe_allow_html=True
+    )
+
+with cl2:
+    st.markdown("""
+      Brieflly explain production methods:         
+    - **Capture production** → *Capture*: Refers to fish caught directly from natural water bodies.
+    - **Aquaculture production (marine)** → *Marine Aq*: Represents fish farming in seawater.
+    - **Aquaculture production (freshwater)** → *Freshwater Aq*: Denotes fish farming in freshwater environments.
+    - **Aquaculture production (brackishwater)** → *Brackish Aq*: Refers to fish farming in brackish water (a mix of freshwater and seawater).
+
+    The `dataframe["Detail"]` column is updated using this mapping to provide concise and consistent labels for production types.
+    """,unsafe_allow_html=True)
+
 
 
 

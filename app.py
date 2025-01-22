@@ -18,8 +18,6 @@ st.set_page_config(
 df = pd.read_csv('data/FishStats2018.csv')
 df = clean_data(df)
 
-st.sidebar.title("Navigation")
-
 # Başlık
 st.markdown("<h1 style = 'text-align: left; color : red;'>FishStats Dashboard </h1>",unsafe_allow_html=True)
 
@@ -32,7 +30,7 @@ st.markdown("""
 )
 
 # Genel Bilgiler
-col1, col2, col3 = st.columns(3)
+col1, col2, col3 ,col4= st.columns(4)
 with col1:
     st.write("### Total Countries :earth_africa:")
     st.metric(label = "",value=util.get_total_features(df,"Country"))
@@ -44,6 +42,10 @@ with col2:
 with col3:
     st.write("### Total Locations :round_pushpin:")
     st.metric(label = "",value=util.get_total_features(df,"Location"))
+
+with col4:
+    st.write("### Total Production Methods")
+    st.metric(label = "",value=util.get_total_features(df,"Detail"))
 
 
 st.dataframe(df)

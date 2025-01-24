@@ -92,19 +92,20 @@ else:
     st.plotly_chart(cviz.plot_countries_prod_map(df,countries,years,locations,methods=methods))
 
 
-col1 , col2 = st.columns(2)
-with col1:
-    st.markdown("<h3>Total Production Amount By Countries</h3>", unsafe_allow_html=True)
-    if len(methods) == 0:
-        st.plotly_chart(cviz.plot_countries_by_production(df,countries,years,locations))
-    else:
-        st.plotly_chart(cviz.plot_countries_by_production(df,countries,years,locations,methods=methods))    
-with col2:
-    st.markdown("<h3 style='text-align: left;'>Countries Production Distribution In Years</h3>", unsafe_allow_html=True)
-    if len(methods) == 0:
-        st.plotly_chart(cviz.plot_countryprod_by_time(df,countries,years,locations))
-    else:
-        st.plotly_chart(cviz.plot_countryprod_by_time(df,countries,years,locations,methods=methods))
+
+st.divider()
+st.markdown("<h3>Total Production Amount By Countries</h3>", unsafe_allow_html=True)
+if len(methods) == 0:
+    st.plotly_chart(cviz.plot_countries_by_production(df,countries,years,locations))
+else:
+    st.plotly_chart(cviz.plot_countries_by_production(df,countries,years,locations,methods=methods))
+
+st.divider()
+st.markdown("<h3 style='text-align: left;'>Countries Production Distribution In Years</h3>", unsafe_allow_html=True)
+if len(methods) == 0:
+    st.plotly_chart(cviz.plot_countryprod_by_time(df,countries,years,locations))
+else:
+    st.plotly_chart(cviz.plot_countryprod_by_time(df,countries,years,locations,methods=methods))
 
 
 

@@ -57,7 +57,7 @@ def plot_countries_by_production(df,countries,years,locations,methods = None):
             grouped_filteredcountryproductions = filteredcountryproductions.groupby("Country")["Production"].sum().reset_index()
         else:
             grouped_filteredcountryproductions = filteredcountryproductions
-        figure = px.bar(grouped_filteredcountryproductions,x = "Country",y = "Production",color="Production",color_continuous_scale="RdBu")
+        figure = px.bar(grouped_filteredcountryproductions,x = "Country",y = "Production",color="Production",color_continuous_scale=px.colors.sequential.RdBu_r)
         figure.update_layout(
             font=dict(size=16),  # Yazı boyutu
             xaxis=dict(
@@ -79,7 +79,7 @@ def plot_countries_by_production(df,countries,years,locations,methods = None):
     else:
         countryproductions = df.groupby("Country")[years].sum().sum(axis = 1).reset_index(name = "Production")
         filteredcountryproductions = countryproductions[countryproductions.Country.isin(countries)]
-        figure = px.bar(filteredcountryproductions,x="Country",y="Production",color="Production")
+        figure = px.bar(filteredcountryproductions,x="Country",y="Production",color="Production",color_continuous_scale=px.colors.sequential.RdBu_r)
         figure.update_layout(
             font=dict(size=16),  # Yazı boyutu
             xaxis=dict(
@@ -229,8 +229,9 @@ def plot_countryspeciesprod_by_time(df,countries,species,years,locations = None,
 
     df = df.groupby(["Country","Species"])[listyears].sum().reset_index()
     df_melted =  pd.melt(df,id_vars=["Country","Species"],value_vars=listyears,value_name="Production",var_name="Years")
-    figure = px.scatter(df_melted,x = "Years",y = "Production", color="Species",symbol="Country",size="Production",color_discrete_sequence=px.colors.sequential.RdBu,facet_col="Species",facet_row="Country")
+    figure = px.scatter(df_melted,x = "Years",y = "Production", color="Species",symbol="Country",size="Production",color_discrete_sequence=px.colors.sequential.RdBu,facet_col="Species",facet_row="Country",facet_row_spacing=0.1,facet_col_spacing=0.05)
     figure.update_layout(
+        plot_bgcolor='#F0F2F6',
         font=dict(size=16),  # Yazı boyutu
         xaxis=dict(
             gridcolor="white",  # Çizgilerin rengini beyaz yapar

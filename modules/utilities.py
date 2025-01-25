@@ -11,6 +11,55 @@ def get_uniquefeature(df,main_feature):
     return topproduction_byfeature[main_feature].values
 
 
+def get_summary_df(df,filter_name,filter_value,years):
+    start,end = years
+    years = [str(year) for year in range(start,end+1,1)]
+    if filter_value != "All Areas":
+        df1 = df[df[filter_name] == filter_value]
+        total_production = df1[years].sum().sum()
+        mean_production = df1[years].mean().mean()
+        median_production = df1[years].median().median()
+        std_production = df1[years].std().mean()
+        min_production = df1[years].min().min()
+        max_production = df1[years].max().max()
+        pd.options.display.float_format = "{:,.2f}".format
+        datafra = pd.DataFrame({
+            filter_value : ["Total","Mean","Median","Standart deviation","Min","Max"],
+            "Values" : [total_production, mean_production,median_production,std_production,min_production,max_production]
+        })
+        return datafra
+    else:
+        copy = df
+        total_production = copy[years].sum().sum()
+        mean_production = copy[years].mean().mean()
+        median_production = copy[years].median().median()
+        std_production = copy[years].std().mean()
+        min_production = copy[years].min().min()
+        max_production = copy[years].max().max()
+        pd.options.display.float_format = "{:,.2f}".format
+        datafra = pd.DataFrame({
+            filter_value : ["Total","Mean","Median","Standart deviation","Min","Max"],
+            "Values" : [total_production, mean_production,median_production,std_production,min_production,max_production]
+        })
+        return datafra
+
+        
+
+def get_yearls_stats(df,filter_name,filter_value,years):
+    start,end = years
+    years = [str(year) for year in range(start,end+1,1)]
+    if filter_value != "All Areas":
+        df = df[df[filter_name] == filter_value]
+        pd.options.display.float_format = "{:,.2f}".format
+        aggdf = df[years].agg(["sum","mean","median","min","max","std"]).transpose()
+        return aggdf
+    else:
+        pd.options.display.float_format = "{:,.2f}".format
+        aggdf = df[years].agg(["sum","mean","median","min","max","std"]).transpose()
+        return aggdf
+
+        
+
 
 
 # Specy Page

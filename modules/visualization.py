@@ -3,8 +3,9 @@ import plotly.express as px
 import streamlit as st
 
 
-def plot_production_increase(df,location = None):
-    years = df.columns[4:]
+def plot_production_increase(df,years,location = None):
+    start ,end = years
+    years = [str(year) for year in range(start,end+1)]
     if location:
         df = df[df["Location"] == location]
         title = f"Production Change Over Years in {location}"
@@ -31,8 +32,10 @@ def plot_production_increase(df,location = None):
 
 
 
-def plot_top_countries_by_production(df, location=None):
-    years = df.columns[4:]
+def plot_top_countries_by_production(df,years, location=None):
+    start ,end = years
+    years = [str(year) for year in range(start,end+1)]
+
     if location:
         df = df[df["Location"] == location]
         title = f"Total Productions By Countries in {location}"
@@ -102,8 +105,9 @@ def plot_top_countries_by_production(df, location=None):
 
 
 
-def plot_prodcountry_incr(df,country):
-    years = df.columns[4:]
+def plot_prodcountry_incr(df,country,years):
+    start,end = years
+    years = [str(year) for year in range(start,end+1,+1)]
     title = f"Production Change Over Years In {country}"
     df = df[df["Country"] == country]
     total_prodution = df[years].sum()
@@ -128,9 +132,13 @@ def plot_prodcountry_incr(df,country):
 
 
 
-def plot_countryspeciy_prod(df,country):
-    years = df.columns[4:]
-    title = f"Which Species are produced most in {country}:"
+def plot_countryspeciy_prod(df,country,years):
+    start,end = years
+    years = [str(year) for year in range(start,end+1,+1)]
+    if len(years) == 1:
+        title = f"Which Species are produced most in {country} for {start}:"
+    else:
+        title = f"Which Species are produced most in {country} for {start} to {end}:"    
     df = df[df["Country"] == country]
     species_total_production = df.groupby('Species')[years].sum().sum(axis = 1).reset_index(name = 'Production').sort_values('Production', ascending = False)
 
@@ -178,13 +186,18 @@ def plot_countryspeciy_prod(df,country):
     )
     return fig
 
-def plot_countries_region(df,country):
-    years = df.columns[4:]
+def plot_countries_region(df,country,years):
+    start,end = years
+    years = [str(year) for year in range(start,end+1,+1)]
+    if len(years) == 1:
+        title=f"{country}'s Production Distribution by Fishery Areas in {start}"
+    else:
+        title=f"{country}'s Production Distribution by Fishery Areas in {start} to {end}"
     df = df[df["Country"] == country]
     grouped_by_location = df.groupby(["Location","Country"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
     total_product = grouped_by_location["Production"].sum()
     grouped_by_location["Percentage"] = grouped_by_location["Production"] / total_product * 100
-    figure = px.bar(grouped_by_location,x="Location",y = "Production",color="Production",color_continuous_scale="Rdbu",title=f"{country}'s Production Distribution by Fishery Areas")
+    figure = px.bar(grouped_by_location,x="Location",y = "Production",color="Production",color_continuous_scale="Rdbu",title=title)
 
     #figure.update_traces(
     #    text=grouped_by_location["Percentage"].map(lambda x: f"{x:.1f}%"),
@@ -207,8 +220,13 @@ def plot_countries_region(df,country):
 
     
 
-def plot_countryprod_methods(df, country):
-    years = df.columns[4:]
+def plot_countryprod_methods(df, country,years):
+    start,end = years
+    years = [str(year) for year in range(start,end+1,+1)]
+    if len(years) == 1:
+        title=f"Production Methods Treemap for {country} in {start}"
+    else:
+        title=f"Production Methods Treemap for {country} in {start} to {end}"
     df = df[df["Country"] == country]
     grouped_by_method = (
         df.groupby(["Detail", "Country"])[years]
@@ -225,17 +243,44 @@ def plot_countryprod_methods(df, country):
         path=["Country", "Detail"],  
         color="Production",  
         color_continuous_scale="RdBu",  
-        title=f"Production Methods Treemap for {country}"  
+        title=title  
     )
     return fig
 
+def plot_locationbox_allyears(df,location,years):
+    start,end = years
+    years = [str(year) for year in range(start,end+1)]
+    if location != "All Areas":
+        df1 = df[df["Location"] == location]
+        df1 = df1.groupby("Location")[years].sum().reset_index()
+        df_melted= pd.melt(df1,id_vars=["Location"],value_vars=years,var_name="Years",value_name="Production")
+        figure = px.histogram(df_melted,x = "Production",title=f"{location}'s Distribution of Total Production Values from {start} to {end}")
+        return figure
+    else:
+        df2 = pd.DataFrame(df[years].sum(),columns=["Production"])
+        #df_melted= pd.melt(df2,id_vars=df2.index,value_vars=years,var_name="Years",value_name="Production")
+        figure = px.histogram(df2,x = "Production",title=f"{location}'s Distribution of Total Production Values from {start} to {end}")
+        return figure
+
+
+
+
+def plot_countrybox_allyears(df,country,years):
+    start,end = years
+    years = [str(year) for year in range(start,end+1)]
+    df = df[df["Country"] == country]
+    df = df.groupby("Country")[years].sum().reset_index()
+    df_melted= pd.melt(df,id_vars=["Country"],value_vars=years,var_name="Years",value_name="Production")
+    figure = px.histogram(df_melted,x = "Production",title=f"{country}'s Distribution of Total Production Values from {start} to {end}")
+    return figure
 
 
 
 #-------------------------------------------------
 
-def plot_top_species_by_production(df,location = None):
-    years = df.columns[4:]
+def plot_top_species_by_production(df,years,location = None):
+    start ,end = years
+    years = [str(year) for year in range(start,end+1)]
     if location:
         df = df[df["Location"] == location]
         title = f"Which Species are produced in {location}:"
@@ -289,8 +334,9 @@ def plot_top_species_by_production(df,location = None):
     return fig
 
 
-def plot_top_production_methods(df,location = None):
-    years = df.columns[4:]
+def plot_top_production_methods(df,years,location = None):
+    start ,end = years
+    years = [str(year) for year in range(start,end+1)]
     if location:
         df = df[df["Location"] == location]
         title = f"Which Production methods are widely used in {location}"
@@ -302,9 +348,9 @@ def plot_top_production_methods(df,location = None):
     return figure
 
 
-def plot_locations_by_prodution(df):
-    years = df.columns[4:]
-    
+def plot_locations_by_prodution(df,years):
+    start ,end = years
+    years = [str(year) for year in range(start,end+1)]
     
     totalproductionby_locations = df.groupby('Location')[years].sum().sum(axis=1).reset_index(name='Production').sort_values('Production', ascending=False)
 

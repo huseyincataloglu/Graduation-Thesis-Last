@@ -32,54 +32,32 @@ st.markdown("""
 # Genel Bilgiler
 col1, col2, col3 ,col4= st.columns(4)
 with col1:
-    st.write("### Total Countries :earth_africa:")
-    st.metric(label = "",value=util.get_total_features(df,"Country"))
+    st.subheader("Total Countries :earth_africa:")
+    st.subheader(f"{util.get_total_features(df,"Country")}")
     
 with col2:
-    st.write("### Total Species :fish:")
-    st.metric(label = "",value=util.get_total_features(df,"Species"))    
+    st.subheader("Total Species :fish:")
+    st.subheader(f"{util.get_total_features(df,"Species")}")
 
 with col3:
-    st.write("### Total Locations :round_pushpin:")
-    st.metric(label = "",value=util.get_total_features(df,"Location"))
+    st.subheader("Total Locations :round_pushpin:")
+    st.subheader(f"{util.get_total_features(df,"Location")}")
 
 with col4:
-    st.write("### Total Production Methods")
-    st.metric(label = "",value=util.get_total_features(df,"Detail"))
+    st.subheader("Total Production Methods")
+    st.subheader(f"{util.get_total_features(df,"Detail")}")
 
 
 st.dataframe(df)
 
 
-st.divider()
 
 # Genel Grafikler
 
-st.markdown("<h2 style='text-align: center;'>Production Increase In Tıme</h2>", unsafe_allow_html=True)
-st.plotly_chart(viz.plot_production_increase(df))
-
-st.divider()
-
-left_column, right_column = st.columns(2)
-with left_column:
-    st.markdown("<h3 style='text-align: center;'>Top Countries by Production</h3>", unsafe_allow_html=True)
-    st.plotly_chart(viz.plot_top_countries_by_production(df))
 
 
-with right_column:
-    st.markdown("<h3 style='text-align: center;'>Top Produced Species</h3>", unsafe_allow_html=True)
-    st.plotly_chart(viz.plot_top_species_by_production(df))
 
-st.divider()
 
-left_column2 , right_column2 = st.columns(2)
-with left_column2:
-    st.markdown("<h3 style='text-align: center;'>Production Methods with Total Fish Catch </h3>", unsafe_allow_html=True)
-    st.plotly_chart(viz.plot_top_production_methods(df)) 
-
-with right_column2:
-    st.markdown("<h3 style = 'text-align: center;'>Top Locations with Total Fish Catch </h3>",unsafe_allow_html=True)
-    st.plotly_chart(viz.plot_locations_by_prodution(df))      
 
 
 

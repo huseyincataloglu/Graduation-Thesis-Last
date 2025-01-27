@@ -80,19 +80,19 @@ def get_production_detailsby_species(df,variable,years):
 def get_commonlocations_forcountries(df,countries,years):
     start,end = years
     years = [str(year) for year in range(start,end+1,1)]
-    commons = set()
-    if len(countries) > 0:
-        df = df[df["Country"].isin(countries)]
-        df = df.groupby(["Location","Country"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
-        
-        for country in countries:
-            locations = set(df[df["Country"] == country]["Location"].values)
-            if len(commons) == 0:
-                commons = locations
-            else:
-                commons = commons.intersection(locations) 
-        return list(commons)         
-    return list(commons) 
+    if len(countries) == 0:
+        return []
+    df = df[df["Country"].isin(countries)]
+    df = df.groupby(["Location","Country"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
+    commons = None
+    for country in countries:
+        locations = set(df[df["Country"] == country]["Location"].values)
+        if commons is None:
+            commons = locations
+        else:
+            commons = commons.intersection(locations) 
+    return list(commons) if commons else []         
+    
 
 def get_methodsfor_locandcountry(df,countries,years,locations = None):
     start,end = years

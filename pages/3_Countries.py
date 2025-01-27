@@ -86,26 +86,83 @@ else:
 #Sidebar extensions -------------------------------
 
 st.divider()
-if len(methods) == 0:
-    st.plotly_chart(cviz.plot_countries_prod_map(df,countries,years,locations),key="production_map_2")
-else:
-    st.plotly_chart(cviz.plot_countries_prod_map(df,countries,years,locations,methods=methods))
+
+st.header("Frequencies and Distributions")
+st.write("--------------------")
+choose = st.selectbox("Choose graph",options = ["Poduction Distributions In Single Year","Annualy Total Prod Box","Total Participation Frequency","Total Participation and Total Porduction Corelation"])
+
+if choose == "Annualy Total Prod Box":
+    if len(locations) == 0:
+        if len(methods) == 0:
+            st.plotly_chart(cviz.plot_proddist_boxplot(df,countries,years))
+        else:
+            st.plotly_chart(cviz.plot_proddist_boxplot(df,countries,years,methods=methods))
+    else:
+        if len(methods) == 0:
+            st.plotly_chart(cviz.plot_proddist_boxplot(df,countries,years,locations=locations))
+        else:
+            st.plotly_chart(cviz.plot_proddist_boxplot(df,countries,years,methods=methods,locations=locations))
+elif choose == "Poduction Distributions In Single Year":
+    years1 = st.multiselect("Select Year:",options=[str(year) for year in range(years[0],years[1]+1)])
+    if len(locations) == 0:
+        if len(methods) == 0:
+            st.plotly_chart(cviz. plot_proddist_yearly(df,countries,years1))
+        else:
+            st.plotly_chart(cviz. plot_proddist_yearly(df,countries,years1,methods=methods))
+    else:
+        if len(methods) == 0:
+            st.plotly_chart(cviz. plot_proddist_yearly(df,countries,years1,locations=locations))
+        else:
+            st.plotly_chart(cviz. plot_proddist_yearly(df,countries,years1,methods=methods,locations=locations))                
+elif choose == "Total Participation Frequency":
+    if len(locations) == 0:
+        if len(methods) == 0:
+            st.plotly_chart(cviz. plot_participation_by_country(df,countries,years))
+        else:
+            st.plotly_chart(cviz. plot_participation_by_country(df,countries,years,methods=methods))
+    else:
+        if len(methods) == 0:
+            st.plotly_chart(cviz.plot_participation_by_country(df,countries,years,locations=locations))
+        else:
+            st.plotly_chart(cviz.plot_participation_by_country(df,countries,years,methods=methods,locations=locations))
+elif choose == "Total Participation and Total Porduction Corelation":
+    if len(locations) == 0:
+        if len(methods) == 0:
+            st.plotly_chart(cviz. plot_partvsprod_by_country(df,countries,years))
+        else:
+            st.plotly_chart(cviz. plot_partvsprod_by_country(df,countries,years,methods=methods))
+    else:
+        if len(methods) == 0:
+            st.plotly_chart(cviz.plot_partvsprod_by_country(df,countries,years,locations=locations))
+        else:
+            st.plotly_chart(cviz.plot_partvsprod_by_country(df,countries,years,methods=methods,locations=locations))
+
+            
+    
 
 
 
-st.divider()
-st.markdown("<h3>Total Production Amount By Countries</h3>", unsafe_allow_html=True)
-if len(methods) == 0:
-    st.plotly_chart(cviz.plot_countries_by_production(df,countries,years,locations))
-else:
-    st.plotly_chart(cviz.plot_countries_by_production(df,countries,years,locations,methods=methods))
 
-st.divider()
-st.markdown("<h3 style='text-align: left;'>Countries Production Distribution In Years</h3>", unsafe_allow_html=True)
-if len(methods) == 0:
-    st.plotly_chart(cviz.plot_countryprod_by_time(df,countries,years,locations))
-else:
-    st.plotly_chart(cviz.plot_countryprod_by_time(df,countries,years,locations,methods=methods))
+column1 , column2 = st.columns([1,1])
+with column1:
+    if len(methods) == 0:
+        st.plotly_chart(cviz.plot_countries_prod_map(df,countries,years,locations),key="production_map_2")
+    else:
+        st.plotly_chart(cviz.plot_countries_prod_map(df,countries,years,locations,methods=methods))
+
+
+#st.divider()
+#st.markdown("<h3>Total Production Amount By Countries</h3>", unsafe_allow_html=True)
+#if len(methods) == 0:
+#    st.plotly_chart(cviz.plot_countries_by_production(df,countries,years,locations))
+#else:
+#    st.plotly_chart(cviz.plot_countries_by_production(df,countries,years,locations,methods=methods))
+
+with column2:
+    if len(methods) == 0:
+        st.plotly_chart(cviz.plot_countryprod_by_time(df,countries,years,locations))
+    else:
+        st.plotly_chart(cviz.plot_countryprod_by_time(df,countries,years,locations,methods=methods))
 
 
 

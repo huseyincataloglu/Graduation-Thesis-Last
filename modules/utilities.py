@@ -5,11 +5,14 @@ def get_total_features(df,variable):
     return df[variable].nunique()
 
 
-def get_uniquefeature(df,main_feature):
+def get_uniquefeature(df,main_feature,filter_feature = None,filter_value = None):
     years = df.columns[4:]
+    if filter_feature:
+        df = df[df[filter_feature] == filter_value]    
     topproduction_byfeature= df.groupby(main_feature)[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
     return topproduction_byfeature[main_feature].values
 
+                    
 
 def get_summary_df(df,filter_name,filter_value,years):
     start,end = years
@@ -45,7 +48,7 @@ def get_summary_df(df,filter_name,filter_value,years):
 
         
 
-def get_yearls_stats(df,filter_name,filter_value,years):
+def get_yearly_stats(df,filter_name,filter_value,years):
     start,end = years
     years = [str(year) for year in range(start,end+1,1)]
     if filter_value != "All Areas":

@@ -161,3 +161,182 @@ def get_species_bycountries(df,countries,years,locations = None,methods = None):
     return commons
                  
 
+
+
+#specy page
+#----------------------
+def get_commonlocations_forspecies(df,species,years):
+    start,end = years
+    years = [str(year) for year in range(start,end+1,1)]
+    if len(species) == 0:
+        return []
+    df = df[df["Species"].isin(species)]
+    df = df.groupby(["Location","Species"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
+    commons = None
+    for country in species:
+        locations = set(df[df["Species"] == country]["Location"].values)
+        if commons is None:
+            commons = locations
+        else:
+            commons = commons.intersection(locations) 
+    return list(commons) if commons else []     
+
+
+def get_methodsfor_locandspecies(df,species,years,locations = None):
+    start,end = years
+    years = [str(year) for year in range(start,end+1,1)]
+    commons = set()
+    if len(species) > 0:
+        if locations:
+            df = df[df["Location"].isin(locations)]
+        df = df[df["Species"].isin(species)]
+        grouped = df.groupby(["Species","Detail","Location"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
+
+        for specy in species:
+            methods = set(grouped[grouped["Species"] == specy]["Detail"].values)
+            if len(commons) == 0:
+                commons = methods
+            else:
+                commons = commons.intersection(methods)
+
+        if locations and len(locations) > 1:
+            for location in locations:
+                location_methods = set(grouped[grouped["Location"] == location]["Detail"].values)
+                commons = commons.intersection(location_methods)
+                
+        return list(commons)        
+    return list(commons)
+
+
+def get_countries_byspecies(df,species,years,locations = None,methods = None):
+    start,end = years
+    years = [str(year) for year in range(start,end+1,1)]
+    commons = set()
+    newdf= df.copy()
+    if len(species) > 0:
+        if locations:
+            newdf = newdf[newdf["Location"].isin(locations)]
+
+        if methods:
+            newdf = newdf[newdf["Detail"].isin(methods)]
+
+        species = list(species)
+
+        newdf = newdf[newdf["Species"].isin(species)]
+        newdf = newdf.groupby(["Species","Country","Location","Detail"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
+        commons = set(newdf[newdf["Species"] == species[0]]["Country"].values)
+        if len(species) > 1:
+            for specy in species[1:]:
+                species_countries = set(newdf[newdf["Species"] == specy]["Country"].values)
+                commons = commons.intersection(species_countries)
+
+        if locations and len(locations) > 1:
+            sub_locations = set()
+            for location in locations:
+                if len(sub_locations) == 0:
+                    sub_locations = set(newdf[newdf["Location"] == location]["Country"].values)
+                else:
+                    sub_locations = sub_locations.intersection(set(newdf[newdf["Location"] == location]["Country"].values))
+            commons = commons.intersection(sub_locations)       
+        if methods and len(methods) > 1:
+            sub_methods = set()
+            for method in methods:
+                if len(sub_methods) == 0:
+                    sub_methods = set(newdf[newdf["Detail"] == method]["Country"].values)
+                else:
+                    sub_methods = sub_methods.intersection(set(newdf[newdf["Detail"] == method]["Country"].values))
+            commons = commons.intersection(sub_methods)  
+    return commons
+
+
+
+
+# location page -----------------
+
+
+
+def get_commoncountr_forlocs(df,locations,years):
+    start,end = years
+    years = [str(year) for year in range(start,end+1,1)]
+    if len(locations) == 0:
+        return []
+    df = df[df["Location"].isin(locations)]
+    df = df.groupby(["Location","Country"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
+    commons = None
+    for location in locations:
+        locations = set(df[df["Location"] == location]["Country"].values)
+        if commons is None:
+            commons = locations
+        else:
+            commons = commons.intersection(locations) 
+    return list(commons) if commons else []     
+
+
+def get_methodsfor_locandcount(df,locations,years,countries = None):
+    start,end = years
+    years = [str(year) for year in range(start,end+1,1)]
+    commons = set()
+    if len(locations) > 0:
+        if countries:
+            df = df[df["Country"].isin(countries)]
+        df = df[df["Location"].isin(locations)]
+        grouped = df.groupby(["Country","Detail","Location"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
+
+        for location in locations:
+            methods = set(grouped[grouped["Location"] == location]["Detail"].values)
+            if len(commons) == 0:
+                commons = methods
+            else:
+                commons = commons.intersection(methods)
+
+        if countries and len(countries) > 1:
+            for country in countries:
+                location_methods = set(grouped[grouped["Country"] == country]["Detail"].values)
+                commons = commons.intersection(location_methods)
+                
+        return list(commons)        
+    return list(commons)
+
+
+def get_species_bycountlocmethd(df,locations,years,countries = None,methods = None):
+    start,end = years
+    years = [str(year) for year in range(start,end+1,1)]
+    commons = set()
+    newdf= df.copy()
+    if len(locations) > 0:
+        if countries:
+            newdf = newdf[newdf["Country"].isin(countries)]
+
+        if methods:
+            newdf = newdf[newdf["Detail"].isin(methods)]
+
+        species = list(locations)
+
+        newdf = newdf[newdf["Location"].isin(locations)]
+        newdf = newdf.groupby(["Species","Country","Location","Detail"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
+        commons = set(newdf[newdf["Location"] == locations[0]]["Species"].values)
+        if len(locations) > 1:
+            for location in locations[1:]:
+                species_countries = set(newdf[newdf["Location"] == location]["Species"].values)
+                commons = commons.intersection(species_countries)
+
+        if countries and len(countries) > 1:
+            sub_locations = set()
+            for country in countries:
+                if len(sub_locations) == 0:
+                    sub_locations = set(newdf[newdf["Country"] == country]["Species"].values)
+                else:
+                    sub_locations = sub_locations.intersection(set(newdf[newdf["Country"] == country]["Species"].values))
+            commons = commons.intersection(sub_locations)       
+        if methods and len(methods) > 1:
+            sub_methods = set()
+            for method in methods:
+                if len(sub_methods) == 0:
+                    sub_methods = set(newdf[newdf["Detail"] == method]["Species"].values)
+                else:
+                    sub_methods = sub_methods.intersection(set(newdf[newdf["Detail"] == method]["Species"].values))
+            commons = commons.intersection(sub_methods)  
+    return commons
+
+
+  

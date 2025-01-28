@@ -51,7 +51,7 @@ def plot_proddist_boxplot(df,countries,years,locations = None,methods = None):
             title="Box Plot of Annual Production Distribution by Country",
             showlegend=False,
             height=400,
-            width=300 * len(countries),  # Dinamik genişlik
+            width=300 * len(countries),  
         )        
 
         return fig

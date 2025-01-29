@@ -186,6 +186,9 @@ def plot_speciesprdouction_by_detail(df,species,years,methods =None):
     filteredspeciesproductions = speciyproductions[speciyproductions.Species.isin(species)]
     figure = px.treemap(filteredspeciesproductions,values="Production",path=[px.Constant("All"),"Detail","Species"],color="Production",color_continuous_scale="RdBu",title="Treemap of Species Production by Details")
     figure.update_layout(
+        title=dict(
+            font=dict(size=22,color = "red")  # Başlık yazı boyutu
+        ),
         font=dict(size=16),  # Yazı boyutu
         coloraxis_colorbar=dict(
             title="Production",        # Renk skalası başlığı
@@ -292,7 +295,23 @@ def plot_speciesondetails_overyears(df,species,years,detail):
 def plot_parallel_corgrapyearly(df, species, years, locations=None, methods=None, countries=None):
     # Veriyi filtreleme
     filtered_df = df.copy()
-
+    if len(years) == 0:
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No years selected. Please select at least one year.",
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=16, color="red")
+        )
+        fig.update_layout(
+            title="No Data Available",
+            showlegend=False,
+            height=400,
+            width=600,
+        )
     # Türleri filtrele
     filtered_df = filtered_df[filtered_df["Species"].isin(species)]
 
@@ -360,7 +379,7 @@ def plot_parallel_corgrap(df, species, years, locations=None, methods=None, coun
     # Yıllar aralığını oluştur
     start, end = years
     years = [str(year) for year in range(start, end + 1)]
-
+    
     # Veriyi filtreleme
     filtered_df = df.copy()
 

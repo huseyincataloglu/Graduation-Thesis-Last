@@ -303,7 +303,7 @@ def plot_distline_locat(df, locations, years, countries=None, methods=None, spec
 
     # Genel düzenlemeler ve başlıklar
     fig.update_layout(
-        title="Production Over Years by Location",
+        title="Production Over Years by Locations",
         showlegend=False,
         height=600,
         width=800,
@@ -329,20 +329,19 @@ def plot_locandmethod(df,locations,years):
     if len(locations) > 0:
         df = df[df["Location"].isin(locations)]
         grouped = df.groupby(["Detail","Location"])[years].sum().sum(axis = 1).reset_index(name = "Production")
-        fig = px.sunburst(grouped,values="Production",path=["Detail","Location"],color="Detail",title="Total Production By Countries and Locations ")
+        fig = px.sunburst(grouped,values="Production",path=["Detail","Location"],color="Detail",title="Total Production By Methods and Locations ")
         fig.update_layout(
-            height=600,  # Yüksekliği artır
-            width=800,  # Genişliği artır
-            font=dict(size=18),  # Genel font boyutunu büyüt
+            height=600,  
+            width=800,  
+            font=dict(size=18),  
             title=dict(
-                text=f"Total Production By Countries and Locations ",
                 font=dict(size=24, color="red"),
             )
         )
-        # Grafikteki iç yazıları ve etiketleri büyüt
+        
         fig.update_traces(
-            textinfo="label+percent entry",  # Yüzde ve etiketleri göster
-            textfont_size=18,  # Etiket yazı boyutunu büyüt
+            textinfo="label+percent entry",  
+            textfont_size=18,  
         )
         return fig
     else:
@@ -386,7 +385,7 @@ def plot_country_map(df,locations, years, countries=None, methods=None, species=
             width=800,  # Genişliği artır
             font=dict(size=18),  # Genel font boyutunu büyüt
             title=dict(
-                text=f"Total Production By Methods ans Locations ",
+                text=f"Total Productions By Countries and Locations",
                 font=dict(size=24, color="red"),
             )
         )

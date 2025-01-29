@@ -9,12 +9,25 @@ from app import df
 
 
 
-choose = st.sidebar.selectbox("Choose type of analyses:",["Fishery Area","Countries","Species","Production methods"])
+choose = st.sidebar.selectbox("Choose type of analyses:",["Fishery Area","Countries","Species"])
 st.sidebar.write("----------")
 years = st.sidebar.slider("Filter the years",min_value=1950,max_value=2018,value=(1950,2018),step=1)
 
 
-st.title("General Analysis")
+st.markdown("<h1 style='text-align: center; color: red;'>General Analysis</h1>",unsafe_allow_html=True)
+st.divider()
+st.markdown("""
+Welcome to the **General Analysis** section. Here you can explore various analyses of the fishery data. 
+You can filter the data by different categories such as **Fishery Area**, **Countries**, **Species**, and **Production Methods**.
+
+Use the sidebar to choose the type of analysis and filter the years according to your preferences. The statistics, production distributions, and trends are displayed interactively to help you understand global fishery patterns and trends over time.
+
+- **Fishery Area**: Explore statistics and production distributions by different fishery areas across the globe.
+- **Countries**: View fishery statistics for specific countries and their contributions to global production.
+- **Species**: Analyze fishery production by different species and understand trends.
+
+Select any option and dive into detailed visualizations to gain insights into the data!
+""",unsafe_allow_html=True)
 st.divider()
 
 

@@ -55,7 +55,7 @@ def plot_proddist_boxplotlocations(df,locations,years,countries = None,methods =
         ))
 
         fig.update_layout(
-            title=dict(text='Production Distribution by Location and Year'),
+            title=dict(text='Production Distribution by Location and Year',font=dict(size=24, color="red")),
             xaxis=dict(
                 title='Years',
                 titlefont=dict(color='red'),  # X ekseni başlık rengi
@@ -129,6 +129,7 @@ def plot_participation_by_locations(df, locations, years,countries = None,method
                     color_discrete_sequence=px.colors.qualitative.Set1)
         fig.update_layout(
             font=dict(size=16),  # Yazı boyutu
+            title=dict(font=dict(size=24, color="red")),
             xaxis=dict(
                 gridwidth=1,
                 title_font=dict(size=18,color="red"),  # X eksen başlık yazı boyutu
@@ -184,6 +185,7 @@ def plot_partvsprod_by_locations(df, locations, years,countries = None,methods =
         figure = px.scatter(df1, x = "Participation Count", y = "Production",color = "Location",title= "Total Participation vs Total Production Amount",size="Production",symbol="Location")
         figure.update_layout(
             font=dict(size=16),  # Yazı boyutu
+            title=dict(font=dict(size=24, color="red")),
             xaxis=dict(
                 gridwidth=1,
                 title_font=dict(size=18,color="red"),  # X eksen başlık yazı boyutu
@@ -238,7 +240,11 @@ def plot_locationn_grapyearly(df,locations,years1,species=None,countries=None,me
             df = df[df["Country"].isin(countries)]
         df = df[df["Location"].isin(locations)]
         melted= pd.melt(df,id_vars="Location",value_vars=years1,value_name="Production",var_name="Years")
-        figure = px.histogram(melted,x = "Production",color="Location",marginal="box",hover_data=melted.columns)
+        figure = px.histogram(melted,x = "Production",color="Location",marginal="box",hover_data=melted.columns,title="Annual Production Distribution by Locations")
+        figure.update_layout(
+            title=dict(font=dict(size=24, color="red")),
+
+        )
         return figure
 
         
@@ -247,6 +253,24 @@ def plot_locationn_grapyearly(df,locations,years1,species=None,countries=None,me
 def plot_distline_locat(df, locations, years, countries=None, methods=None, species=None):
     start, end = years
     years = [str(year) for year in range(start, end+1)]  # Yılları stringe dönüştür
+    if len(locations) == 0:
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No locations selected. Please select at least one location.",
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=16, color="red")
+        )
+        fig.update_layout(
+            title="No Data Available",
+            showlegend=False,
+            height=400,
+            width=600,
+        )
+        return fig
     if species:
         df = df[df["Species"].isin(species)]
     if methods:
@@ -298,22 +322,267 @@ def plot_distline_locat(df, locations, years, countries=None, methods=None, spec
 
 
 
+def plot_locandmethod(df,locations,years):
+    start, end = years
+    years = [str(year) for year in range(start, end+1)]
+
+    if len(locations) > 0:
+        df = df[df["Location"].isin(locations)]
+        grouped = df.groupby(["Detail","Location"])[years].sum().sum(axis = 1).reset_index(name = "Production")
+        fig = px.sunburst(grouped,values="Production",path=["Detail","Location"],color="Detail",title="Total Production By Countries and Locations ")
+        fig.update_layout(
+            height=600,  # Yüksekliği artır
+            width=800,  # Genişliği artır
+            font=dict(size=18),  # Genel font boyutunu büyüt
+            title=dict(
+                text=f"Total Production By Countries and Locations ",
+                font=dict(size=24, color="red"),
+            )
+        )
+        # Grafikteki iç yazıları ve etiketleri büyüt
+        fig.update_traces(
+            textinfo="label+percent entry",  # Yüzde ve etiketleri göster
+            textfont_size=18,  # Etiket yazı boyutunu büyüt
+        )
+        return fig
+    else:
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No locations selected. Please select at least one location.",
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=16, color="red")
+        )
+        fig.update_layout(
+            title="No Data Available",
+            showlegend=False,
+            height=400,
+            width=600,
+        )
+        return fig
 
 
-def plot_groupedbarloc(df,locations,years,countries = None,methods = None,species = None):
+
+
+def plot_country_map(df,locations, years, countries=None, methods=None, species=None):
+    start, end = years
+    years = [str(year) for year in range(start, end+1)]
+    if len(locations) > 0:
+        df = df[df["Location"].isin(locations)]
+        if countries:
+            df = df[df["Country"].isin(countries)]
+        if methods:
+            df = df[df["Detail"].isin(methods)]
+        if species:
+            df = df[df["Species"].isin(species)]
+
+        grouped = df.groupby("Country")[years].sum().sum(axis = 1).reset_index(name = "Production")
+        fig = px.choropleth(grouped,locations="Country",locationmode="country names",color="Production",color_continuous_scale="RdBu")
+        fig.update_layout(
+            height=600,  # Yüksekliği artır
+            width=800,  # Genişliği artır
+            font=dict(size=18),  # Genel font boyutunu büyüt
+            title=dict(
+                text=f"Total Production By Methods ans Locations ",
+                font=dict(size=24, color="red"),
+            )
+        )
+        return fig
+    else:
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No locations selected. Please select at least one location.",
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=16, color="red")
+        )
+        fig.update_layout(
+            title="No Data Available",
+            showlegend=False,
+            height=400,
+            width=600,
+        )
+        return fig    
+
+
+
+
+
+def plot_specygrouped_bar(df,locations,years,species):
+    start, end = years
+    years = [str(year) for year in range(start, end+1)] 
+    if len(locations) > 0:
+        df = df[df["Location"].isin(locations)]
+        df = df[df["Species"].isin(species)]
+        grouped = df.groupby(["Location","Species"])[years].sum().sum(axis = 1).reset_index(name ="Production")
+        fig = px.bar(grouped,x = "Location",y = "Production",color="Species",title="Total Productions By Species and Locations",barmode="group")
+        fig.update_layout(
+            title=dict(font=dict(size=24, color="red")),  
+            height=400,
+            width=600,
+        )
+        return fig
+    else:
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No locations selected. Please select at least one location.",
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=16, color="red")
+        )
+        fig.update_layout(
+            title="No Data Available",
+            showlegend=False,
+            height=400,
+            width=600,
+        )
+        return fig
+
+
+
+def plot_groupedbarloc(df,locations,years):
+    start, end = years
+    years = [str(year) for year in range(start, end+1)]  
+    if len(locations) > 0:
+        df = df[df["Location"].isin(locations)]
+        grouped = df.groupby("Location")[years].sum().sum(axis = 1).reset_index(name ="Production")
+        fig = px.bar(grouped,x = "Location",y = "Production",color="Location",title="Total Productions")
+        fig.update_layout(
+            title=dict(font=dict(size=24, color="red")),  
+            height=400,
+            width=600,
+        )
+        return fig
+    else:
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No locations selected. Please select at least one location.",
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=16, color="red")
+        )
+        fig.update_layout(
+            title="No Data Available",
+            showlegend=False,
+            height=400,
+            width=600,
+        )
+        return fig
+
+
+def plot_groupedbarlocandmethod(df,locations,years,methods):
+    start, end = years
+    years = [str(year) for year in range(start, end+1)]  # Yılları stringe dönüştür
+    if len(locations) > 0:
+        df = df[df["Location"].isin(locations)]
+        df = df[df["Detail"].isin(methods)]
+        grouped = df.groupby(["Location","Detail"])[years].sum().sum(axis = 1).reset_index(name ="Production")
+
+        fig = px.bar(grouped,x = "Location",y = "Production",color="Detail",title="Total Productions By Methods and Locations",barmode="group")
+        fig.update_layout(
+            title=dict(font=dict(size=24, color="red")),  
+            height=400,
+            width=600,
+        )
+        return fig
+    else:
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No locations selected. Please select at least one location.",
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=16, color="red")
+        )
+        fig.update_layout(
+            title="No Data Available",
+            showlegend=False,
+            height=400,
+            width=600,
+        )
+        return fig
+
+def plot_locmethod_specy(df,locations,years,methods,species):
     start, end = years
     years = [str(year) for year in range(start, end+1)]  # Yılları stringe dönüştür
 
-    if countries:
-        df = df[df["Country"].isin(countries)]
-    df = df[df["Location"].isin(locations)]
+    if len(locations) > 0:
+        # Filtreleme
+        df = df[df["Location"].isin(locations)]
+        df = df[df["Detail"].isin(methods)]
+        df = df[df["Species"].isin(species)]
+        
+        # Grup bazlı toplama
+        grouped = df.groupby(["Location", "Detail", "Species"])[years].sum().sum(axis=1).reset_index(name="Production")
 
-    grouped = df.groupby("Location")[years].sum().sum(axis = 1).reset_index(name ="Production")
-    
+        # Alt grafiklerin satır ve sütun düzeni
+        rows = len(methods)  # Yöntemlere göre satır
+        cols = len(locations)  # Ülkelere göre sütun
 
-    return fig
+        # Çoklu grafik oluşturma
+        figure = make_subplots(
+            rows=rows, cols=cols,
+            subplot_titles=[f"{method} - {location}" for method in methods for location in locations]
+        )
 
+        
+        for i, method in enumerate(methods, start=1):  
+            filtered = grouped[grouped["Detail"] == method]  
+            for j, location in enumerate(locations, start=1):  
+                sub_filtered = filtered[filtered["Location"] == location]  
 
+                if not sub_filtered.empty:
+                    # Çubuk grafiği oluştur
+                    bar_trace = go.Bar(
+                        x=sub_filtered["Species"], 
+                        y=sub_filtered["Production"], 
+                        name=f"{method} - {location}",
+                        marker=dict(line=dict(width=1)),
+                    )
+                    
+                    figure.add_trace(bar_trace, row=i, col=j)
+
+        
+        figure.update_layout(
+            title=dict(font=dict(size=24, color="red")),
+            height=rows * 400,  
+            width=cols * 400, 
+            title_text="Total Productions by Species, Methods, and Locations",
+        )
+
+        return figure
+    else:
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No locations selected. Please select at least one location.",
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=16, color="red")
+        )
+        fig.update_layout(
+            title="No Data Available",
+            showlegend=False,
+            height=400,
+            width=600,
+        )
+        return fig
 
 
 

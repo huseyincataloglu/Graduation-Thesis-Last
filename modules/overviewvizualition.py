@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+from plotly.subplots import make_subplots
 
 
 def plot_locationbox_allyears(df,years):
@@ -218,3 +219,5 @@ def plot_locations_by_prodution(df,years):
     #st.write(f"Mevcut Sayfa: {st.session_state.methodsayfa} / {toplam_sayfa}")
 
     return fig
+
+

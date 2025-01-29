@@ -34,8 +34,8 @@ st.sidebar.divider()
 
 #Sidebar configurations -------------
 
-st.markdown("<h1 style='text-align: left;color:red;'>Specy Based Analyses 🐟</h1>",unsafe_allow_html=True)
-
+st.markdown("<h1 style='text-align: center;color:red;'>Specy Based Analyses 🐟</h1>",unsafe_allow_html=True)
+st.divider()
 cl1,cl2 = st.columns(2)
 with cl1:
     st.markdown(
@@ -43,11 +43,14 @@ with cl1:
         <h2 style="font-size:24px;">Welcome to the <strong style="color:red;">Specy Page</strong>!</h2>
         <p style="font-size:20px;">Here you can explore:</p>
         <ul style="font-size:18px;">
+            <li>How the production distributed across multiple species</li>
+            <li>Which species produced more for a specific country</li>
+            <li>Compare based on Locations</li>
             <li>Total productions by species and differences between them</li>
             <li>Production change based on a specific species for variety years</li>
             <li>Compare production methods for different species</li>
         </ul>
-        <p style="font-size:18px;">Use the sidebar to select species and methods to customize your analysis and once you choose the species and the range of years, it will effect all the graphs!</p>
+        <p style="font-size:18px;">Use the sidebar to select species,locations,countries, and methods to customize your analysis!</p>
         """, 
         unsafe_allow_html=True
     )
@@ -225,7 +228,6 @@ else:
 
 st.write("-------------")
 
-st.markdown("<h3>Distributions Of Production by Species and Methods Over Years</h3>", unsafe_allow_html=True)
 st.plotly_chart(speciesviz.plot_speciesondetails_overyears(df,species,years,methods))
 
 

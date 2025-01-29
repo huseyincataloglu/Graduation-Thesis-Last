@@ -47,7 +47,7 @@ def plot_proddist_boxplotspecies(df,species,years,locations = None,methods = Non
             fig.add_trace(go.Box(x = melted1["Species"],y = melted1["Production"],name=specy),row = 1,col=i)
             i += 1
         fig.update_layout(
-            title="Box Plot of Annual Production Distribution by Species",
+            title=dict(text='Box Plot of Annual Production Distribution by Species"',font=dict(size=24, color="red")),
             showlegend=False,
             height=400,
             width=300 * len(species), 
@@ -98,6 +98,7 @@ def plot_participation_by_species(df, species, years,locations = None,methods = 
                     labels={'Participation Count': 'Number of Participation'},
                     color_discrete_sequence=px.colors.qualitative.Set1)
         fig.update_layout(
+            title=dict(font=dict(size=24, color="red")),
             font=dict(size=16),  # Yazı boyutu
             xaxis=dict(
                 gridwidth=1,
@@ -153,6 +154,7 @@ def plot_partvsprod_by_species(df, species, years,locations = None,methods = Non
 
         figure = px.scatter(df1, x = "Participation Count", y = "Production",color = "Species",title= "Total Participation vs Total Production Amount",size="Production")
         figure.update_layout(
+            title=dict(font=dict(size=24, color="red")),
             font=dict(size=16),  # Yazı boyutu
             xaxis=dict(
                 gridwidth=1,
@@ -221,7 +223,7 @@ def plot_species_overyears(df, species, years, locations=None, methods=None, cou
     figure.update_layout(
         title=dict(
             text="Species Production Over Years",
-            font=dict(size=22)  # Başlık yazı boyutu
+            font=dict(size=22,color = "red")  # Başlık yazı boyutu
         ),
         font=dict(size=16),  # Genel yazı boyutu
         xaxis=dict(
@@ -258,9 +260,10 @@ def plot_speciesondetails_overyears(df,species,years,detail):
     df_melted =  pd.melt(df,id_vars=["Species","Detail"],value_vars=listyears,value_name="Production",var_name="Years")
     df_melted = df_melted[df_melted["Species"].isin(species)]
     df_melted = df_melted[df_melted["Detail"].isin(detail)]
-    figure = px.line(df_melted,x = "Years",y = "Production", color="Detail",facet_col="Detail",facet_row="Species",facet_row_spacing=0.1,color_discrete_sequence=px.colors.sequential.RdBu)
+    figure = px.line(df_melted,x = "Years",y = "Production", color="Detail",facet_col="Detail",facet_row="Species",facet_row_spacing=0.1,color_discrete_sequence=px.colors.sequential.RdBu,title="Species distributions by methods")
     figure.update_layout(
         font=dict(size=16),  # Yazı boyutu
+        title=dict(font=dict(size=24, color="red")),
         xaxis=dict(
             gridcolor="white",  # Çizgilerin rengini beyaz yapar
             gridwidth=1,

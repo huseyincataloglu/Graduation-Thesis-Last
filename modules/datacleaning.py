@@ -36,6 +36,7 @@ def clean_data(dataframe):
     kayıp_türler["Species"] = kayıp_türler.apply(fill_species,axis = 1)     
     dataframe.loc[dataframe["Species"].isnull(),"Species"] = kayıp_türler["Species"]
 
+
     # Making Some Features More Useful
     production_mapping = {
     "Capture production": "Capture",

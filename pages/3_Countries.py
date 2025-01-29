@@ -8,52 +8,60 @@ from app import df
 
 
 
-st.markdown("<h1 style='text-align: center; color : red;'>Country Based Analyses &#127759;</h1>",unsafe_allow_html=True)
-st.divider()
-st.markdown(
-        """
-        <h2 style="font-size:28px; text-align:left;">🌍 Welcome to the <strong style="color:red;">Country Analysis Page</strong>! 🌍</h2>
-        <p style="font-size:20px; text-align:justify;">
-            This page offers powerful tools to explore and analyze fish production data across multiple countries, regions, and production methods. Here's what you can do:
-        </p>
-       """,unsafe_allow_html=True)
+# Page Header
+st.markdown("<h1 style='text-align: center; color : red;'>Country Based Analyses &#127759;</h1>", unsafe_allow_html=True)
 st.divider()
 
-c1,c2 = st.columns(2)
+# Main Introduction
+st.markdown(
+    """
+    <h2 style="font-size:28px; text-align:left;">🌍 Welcome to the <strong style="color:red;">Country Analysis Page</strong>! 🌍</h2>
+    <p style="font-size:20px; text-align:justify;">
+        This page offers powerful tools to explore and analyze fish production data across multiple countries, regions, and production methods. Here's what you can do:
+    </p>
+    """, unsafe_allow_html=True)
+st.divider()
+
+# Content Layout with Columns
+c1, c2 = st.columns(2)
+
 with c1:
-    st.markdown(""" <h2 style="font-size:28px; text-align:left; color : red;"> Here is what you can do : </h2> """,unsafe_allow_html=True)
+    st.markdown(""" <h2 style="font-size:28px; text-align:left; color : red;"> Here's What You Can Do: </h2> """, unsafe_allow_html=True)
 
     st.markdown(
         """
         <h3 style="font-size:22px; color:darkgreen;">🔍 Explore Data for a Single Country:</h3>
         <ul style="font-size:18px; list-style-type:square; margin-left:20px;">
-            <li>Analyze total production amounts for a specific species or multiple species.</li>
+            <li>Analyze total production amounts for specific species or multiple species.</li>
             <li>Observe production trends over time, broken down by regions or production methods.</li>
-            <li>Focus on production in specific regions or across all regions.</li>
+            <li> You can also see the frequencies and distributions.</li>
+            <li>Focus on production in specific regions or across multiple regions.</li>
         </ul>
         <h3 style="font-size:22px; color:darkgreen;">📊 Compare Data Across Multiple Countries:</h3>
         <ul style="font-size:18px; list-style-type:square; margin-left:20px;">
+            <li>Compare total production distributions and frequencies for selected countries.</li>
             <li>Compare total production amounts for selected countries.</li>
             <li>Analyze production changes over time for selected countries.</li>
             <li>Examine production in shared regions or based on specific production methods.</li>
-            <li>Focus on common fish species or specific fish species across countries.</li>
+            <li>Focus on common fish species or specific species across countries.</li>
         </ul>
         """, 
         unsafe_allow_html=True
     )
+
 with c2:
-    st.markdown("""
-        <h3 style="font-size:22px; color:darkgreen;">⚙️ Customization and Insights:</h3>
+    st.markdown(""" 
+        <h3 style="font-size:22px; color:darkgreen;">⚙️ Customize Your Analysis:</h3>
         <p style="font-size:18px; text-align:justify;">
             Use the sidebar to customize your analysis by selecting:
             <ul style="font-size:18px; list-style-type:circle; margin-left:40px;">
                 <li>Countries and regions of interest.</li>
-                <li>Specific fish species or all species.</li>
-                <li>Production methods or a combination of methods.</li>
+                <li>Specific fish species or multiple species.</li>
+                <li>Production methods or combinations of methods.</li>
                 <li>The range of years for your analysis.</li>
             </ul>
         </p>
-    """,unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
 # Sidebar extensions -----------------------------
 
@@ -166,8 +174,8 @@ with column2:
 
 
 
-st.divider()
-st.markdown("<h3 style='text-align:left;'> Total Productions Of Countries By Species</h3>", unsafe_allow_html=True)
+st.write("-------------")
+
 if len(locations) == 0:
     if len(methods) == 0:
         st.plotly_chart(cviz.plot_countrieswithspecies(df,countries,species,years))      
@@ -185,7 +193,7 @@ else:
 
 st.divider()
 
-st.markdown("<h3 style='text-align: left;'>Species Production Distribution Of Countries In Years</h3>",unsafe_allow_html=True)
+
 if len(locations) == 0:
     if len(methods) == 0:
             st.plotly_chart(cviz.plot_countryspeciesprod_by_time(df,countries,species,years))    
@@ -199,11 +207,9 @@ else:
 
     
 
-
-
 st.divider()
 
-st.markdown("<h3 style='text-align: left;'> Production Methods Of Countries By Total Amount </h3>",unsafe_allow_html=True)
+
 if len(locations) == 0:
     st.plotly_chart(cviz.plot_country_productiondetail(df,countries,years))
 else:

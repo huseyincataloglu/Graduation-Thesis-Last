@@ -502,7 +502,7 @@ def plot_countrieswithspecies(df,countries,species,years,locations = None,method
     df = df[df["Country"].isin(countries)]
     df = df[df["Species"].isin(species)]
     totalproductions = df.groupby(["Country","Species"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
-    figure = px.bar(totalproductions,x = "Production", y = "Country",color="Species",color_discrete_sequence=px.colors.sequential.RdBu,orientation="h")
+    figure = px.bar(totalproductions,x = "Production", y = "Country",color="Species",color_discrete_sequence=px.colors.sequential.RdBu,orientation="h",title="Total Productions Of Countries By Species")
     figure.update_layout(
         font=dict(size=16),  # Yazı boyutu
         xaxis=dict(
@@ -538,7 +538,7 @@ def plot_countryspeciesprod_by_time(df,countries,species,years,locations = None,
 
     df = df.groupby(["Country","Species"])[listyears].sum().reset_index()
     df_melted =  pd.melt(df,id_vars=["Country","Species"],value_vars=listyears,value_name="Production",var_name="Years")
-    figure = px.scatter(df_melted,x = "Years",y = "Production", color="Species",symbol="Country",size="Production",color_discrete_sequence=px.colors.sequential.RdBu,facet_col="Species",facet_row="Country",facet_row_spacing=0.1,facet_col_spacing=0.05)
+    figure = px.scatter(df_melted,x = "Years",y = "Production", color="Species",symbol="Country",size="Production",color_discrete_sequence=px.colors.sequential.RdBu,facet_col="Species",facet_row="Country",facet_row_spacing=0.1,facet_col_spacing=0.05,title="Species Production Distribution Of Countries In Years")
     figure.update_layout(
         plot_bgcolor='#F0F2F6',
         font=dict(size=16),  # Yazı boyutu
@@ -575,7 +575,7 @@ def plot_country_productiondetail(df,countries,years,locations = None):
         df = df[df["Location"].isin(locations)]
     df = df.groupby(["Country","Detail"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
     df = df[df["Country"].isin(countries)]
-    figure = px.bar(df,x="Country",y = "Production",color="Detail",barmode="group",color_discrete_sequence=px.colors.sequential.RdBu)
+    figure = px.bar(df,x="Country",y = "Production",color="Detail",barmode="group",color_discrete_sequence=px.colors.sequential.RdBu,title="Production Methods Of Countries By Total Amount")
     figure.update_layout(
         font=dict(size=16),  # Yazı boyutu
         xaxis=dict(

@@ -9,7 +9,7 @@ def plot_locationbox_allyears(df,years):
     years = [str(year) for year in range(start,end+1)]
     df2 = pd.DataFrame(df[years].sum(),columns=["Production"])
     #df_melted= pd.melt(df2,id_vars=df2.index,value_vars=years,var_name="Years",value_name="Production")
-    figure = px.histogram(df2,x = "Production",title=f"Distribution of Total Production Values In Years")
+    figure = px.histogram(df2,x = "Production",marginal="box",title=f"Distribution of Total Production Values In Years")
     return figure
 
 

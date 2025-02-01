@@ -312,6 +312,7 @@ def plot_parallel_corgrapyearly(df, species, years, locations=None, methods=None
             height=400,
             width=600,
         )
+        return fig
     # Türleri filtrele
     filtered_df = filtered_df[filtered_df["Species"].isin(species)]
 

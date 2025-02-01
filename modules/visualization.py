@@ -10,7 +10,7 @@ def plot_locbox_allyears(df,years,location):
     df = df[df["Location"] == location]
     df = df.groupby("Location")[years].sum().reset_index()
     df_melted= pd.melt(df,id_vars=["Location"],value_vars=years,var_name="Years",value_name="Production")
-    figure = px.histogram(df_melted,x = "Production",title=f"{location}'s Distribution of Total Production Values from {start} to {end}")
+    figure = px.histogram(df_melted,x = "Production",marginal="box",title=f"{location}'s Distribution of Total Production Values from {start} to {end}")
     return figure
 
 
@@ -346,7 +346,7 @@ def plot_countrybox_allyears(df,country,years):
     df = df[df["Country"] == country]
     df = df.groupby("Country")[years].sum().reset_index()
     df_melted= pd.melt(df,id_vars=["Country"],value_vars=years,var_name="Years",value_name="Production")
-    figure = px.histogram(df_melted,x = "Production",title=f"{country}'s Distribution of Total Production Values from {start} to {end}")
+    figure = px.histogram(df_melted,x = "Production",marginal="rug",title=f"{country}'s Distribution of Total Production Values from {start} to {end}")
     return figure
 
 
@@ -360,7 +360,7 @@ def plot_specybox_allyears(df,specy,years):
     df = df[df["Species"] == specy]
     df = df.groupby("Species")[years].sum().reset_index()
     df_melted= pd.melt(df,id_vars=["Species"],value_vars=years,var_name="Years",value_name="Production")
-    figure = px.histogram(df_melted,x = "Production",title=f"{specy}'s Distribution of Total Production Values from {start} to {end}")
+    figure = px.density_heatmap(df_melted,x = "Years",y = "Production",title=f"{specy}'s Distribution of Total Production Values from {start} to {end}",marginal_x="histogram",marginal_y="histogram",color_continuous_scale=px.colors.sequential.RdBu)
     return figure
 
 def plot_prodspecy_incr(df,specy,years):

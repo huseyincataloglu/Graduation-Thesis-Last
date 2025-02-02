@@ -165,7 +165,7 @@ production_mapping = {
     }
 son1,son2 = st.columns(2)
 with son1:
-    st.write("In detail column, The name of production methos can be minimized for efficency and readablitiy")
+    st.write("In detail column, The name of production methods can be minimized for efficency and readablity")
     st.write(production_mapping)
 
 

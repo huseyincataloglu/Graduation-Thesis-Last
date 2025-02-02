@@ -78,9 +78,8 @@ if choose ==  "Fishery Area":
             st.markdown("""<h2 style = 'text-align : center;'> Production Distributions</h3> """,unsafe_allow_html=True)
             st.write("-------")
             st.plotly_chart(viz.plot_locbox_allyears(df,years,location))
-
-        st.markdown("<h1 style='text-align: center; color: red;'>Country Section</h1>",unsafe_allow_html=True)
         st.write("-------------------")
+        st.markdown("<h1 style='text-align: center; color: red;'>Country Section</h1>",unsafe_allow_html=True)
         lc1,lc2= st.columns([1,1],vertical_alignment="top")
         with lc1:
             st.write("---------------")
@@ -94,8 +93,6 @@ if choose ==  "Fishery Area":
             st.plotly_chart(viz.locatcountry_meth(df,years,location))
 
 
-
-        st.write("-------------------")
         st.markdown("<h1 style='text-align: center; color: red;'>Specy Section</h1>",unsafe_allow_html=True)
         st.write("-------------------")
         ls1,ls2 = st.columns([1,1],vertical_alignment="top")
@@ -109,7 +106,6 @@ if choose ==  "Fishery Area":
         
         st.write("--------------------------")
         st.markdown("<h1 style='text-align: center; color: red;'>Method Section</h1>",unsafe_allow_html=True)
-        st.write("-------------------")
         lm1,lm2 = st.columns(2)
         with lm1:
             st.plotly_chart(viz.plot_locamethods_bar(df,years,location))

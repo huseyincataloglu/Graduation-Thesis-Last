@@ -1,2 +1,4 @@
-# Data-analyze-streamlit-dashboard
-Created for graduation thesis project 
+
+# Graduation-ThesisCukurova
+StreamLit app for data-visualization
+

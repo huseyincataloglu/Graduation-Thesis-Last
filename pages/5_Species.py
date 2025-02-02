@@ -220,15 +220,18 @@ else:
                 st.plotly_chart(speciesviz.plot_species_overyears(df,species,years,countries=countries,methods = methods,locations=locations))
 
 st.write("-------------")
-if len(methods) == 0:
+if len(locations) == 0:
     st.plotly_chart(speciesviz.plot_speciesprdouction_by_detail(df,species,years))
 else:
-    st.plotly_chart(speciesviz.plot_speciesprdouction_by_detail(df,species,years,methods))    
+    st.plotly_chart(speciesviz.plot_speciesprdouction_by_detail(df,species,years,locations))    
 
 
 st.write("-------------")
 
-st.plotly_chart(speciesviz.plot_speciesondetails_overyears(df,species,years,methods))
+if len(countries) == 0:
+    st.plotly_chart(speciesviz.plot_speciescountry_parallel(df, species, years))
+else:    
+    st.plotly_chart(speciesviz.plot_speciescountry_parallel(df, species, years, countries))
 
 
 

@@ -176,15 +176,15 @@ def plot_partvsprod_by_species(df, species, years,locations = None,methods = Non
 
     
 
-def plot_speciesprdouction_by_detail(df,species,years,methods =None):
+def plot_speciesprdouction_by_detail(df,species,years,locations =None):
     start,end = years
     years = [str(year) for year in range(start,end + 1,+1)]
-    if methods :
-        df = df[df["Detail"].isin(methods)]
+    if locations :
+        df = df[df["Location"].isin(locations)]
     
-    speciyproductions = df.groupby(["Species","Detail"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
+    speciyproductions = df.groupby(["Species","Detail","Location","Country"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
     filteredspeciesproductions = speciyproductions[speciyproductions.Species.isin(species)]
-    figure = px.treemap(filteredspeciesproductions,values="Production",path=[px.Constant("All"),"Detail","Species"],color="Production",color_continuous_scale="RdBu",title="Treemap of Species Production by Details")
+    figure = px.icicle(filteredspeciesproductions,values="Production",path=[px.Constant("All"),"Detail","Location","Species"],color="Production",color_continuous_scale="RdBu",title="Icicle Chart of Species Production With Location Filter")
     figure.update_layout(
         title=dict(
             font=dict(size=22,color = "red")  # Başlık yazı boyutu
@@ -256,41 +256,58 @@ def plot_species_overyears(df, species, years, locations=None, methods=None, cou
 
     return figure
 
-def plot_speciesondetails_overyears(df,species,years,detail):
-    start,end = years
-    listyears = [str(year) for year in range(start,end+1,1)]
-    df = df.groupby(["Species","Detail"])[listyears].sum().reset_index()
-    df_melted =  pd.melt(df,id_vars=["Species","Detail"],value_vars=listyears,value_name="Production",var_name="Years")
-    df_melted = df_melted[df_melted["Species"].isin(species)]
-    df_melted = df_melted[df_melted["Detail"].isin(detail)]
-    figure = px.line(df_melted,x = "Years",y = "Production", color="Detail",facet_col="Detail",facet_row="Species",facet_row_spacing=0.1,color_discrete_sequence=px.colors.sequential.RdBu,title="Species distributions by methods")
-    figure.update_layout(
-        font=dict(size=16),  # Yazı boyutu
-        title=dict(font=dict(size=24, color="red")),
-        xaxis=dict(
-            gridcolor="white",  # Çizgilerin rengini beyaz yapar
-            gridwidth=1,
-            title_font=dict(size=18),  # X eksen başlık yazı boyutu
-            tickfont=dict(size=14)     # X eksen işaret yazı boyutu
-        ),
-        yaxis=dict(
-            gridwidth=1,
-            title_font=dict(size=18),  # Y eksen başlık yazı boyutu
-            tickfont=dict(size=14)     # Y eksen işaret yazı boyutu
-        ),
-        legend=dict(
-        title=dict(font=dict(size=16)),  # Legend başlığı yazı boyutu
-        font=dict(size=14),              # Legend öğelerinin yazı boyutu
-        itemclick="toggleothers",        # Legend öğelerinin tıklama davranışı
-        itemsizing="constant",           # Legend simge boyutunu sabit tutar
-        traceorder="normal",             # Legend sıralama düzeni
+def plot_speciescountry_parallel(df, species, years, countries=None):
+    start, end = years
+    listyears = [str(year) for year in range(start, end + 1, 1)]
+    
+    # Ülkeleri filtrele (eğer varsa)
+    if countries:
+        df = df[df["Country"].isin(countries)]
+    else:
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No countries selected. Please select at least one country.",
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=16, color="red")
         )
+        fig.update_layout(
+            title="No Data Available",
+            showlegend=False,
+            height=400,
+            width=600,
+        )
+        return fig
+    # Türleri filtrele
+    df = df[df["Species"].isin(species)]    
+    
+    # Yeni veri çerçevesi oluştur: Sadece gerekli sütunlar
+    newdf = df.loc[:, ["Species", "Detail", "Country"] + listyears]
+    
+    # Üretim toplamını hesapla
+    newdf2 = df.groupby(["Species", "Detail", "Country"])[listyears].sum().sum(axis=1).reset_index(name="Production")
+    
+    # Yeni üretim değerini eski veri çerçevesine ekle
+    newdf = newdf.merge(newdf2, on=["Species", "Detail", "Country"], how="left")
+    
+    # Parallel categories grafiği oluştur
+    fig = px.parallel_categories(newdf, dimensions=["Species", "Detail", "Country"],
+                                 color="Production",  # Renklendirme için 'Production' değerini kullan
+                                 color_continuous_scale=px.colors.sequential.Plasma,  # Sürekli renk skalası
+                                 title="Parallel Category Chart,Species and Production by Country and Detail")
+    
+    fig.update_layout(
+        title=dict(
+            font=dict(size=22,color = "red")  # Başlık yazı boyutu
+        ),
+        font=dict(size=12),
+        coloraxis_colorbar=dict(title="Production")
     )
-    figure.for_each_yaxis(lambda yaxis: yaxis.update(title_text = "",tickfont=dict(color='black', size=18),title_font=dict(color='red',size=18)))
-    figure.for_each_xaxis(lambda yaxis: yaxis.update(tickfont=dict(color='black', size=18),title_font=dict(color='red',size=18)))
-    figure.for_each_annotation(lambda a : a.update(text = ""))
-    return figure
-
+    
+    return fig
 
 def plot_parallel_corgrapyearly(df, species, years, locations=None, methods=None, countries=None):
     # Veriyi filtreleme

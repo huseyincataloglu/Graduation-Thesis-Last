@@ -250,9 +250,7 @@ def plot_participation_by_country(df, countries, years,locations = None,methods 
         )
         return fig
     else:
-        return None    
-
-
+        return None 
 
 
 def plot_partvsprod_by_country(df, countries, years,locations = None,methods = None):
@@ -498,28 +496,43 @@ def plot_countrieswithspecies(df,countries,species,years,locations = None,method
     if methods:
         df = df[df["Detail"].isin(methods)]
     
-
     df = df[df["Country"].isin(countries)]
     df = df[df["Species"].isin(species)]
     totalproductions = df.groupby(["Country","Species"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
-    figure = px.bar(totalproductions,x = "Production", y = "Country",color="Species",color_discrete_sequence=px.colors.sequential.RdBu,orientation="h",title="Total Productions Of Countries By Species")
-    figure.update_layout(
-        font=dict(size=16),  # Yazı boyutu
-        xaxis=dict(
-            title_font=dict(size=18,color = "red"),  # X eksen başlık yazı boyutu
-            tickfont=dict(size=14,color = "black")     # X eksen işaret yazı boyutu
+    uniquecountry = list(totalproductions.Country.unique())
+    uniquespecies = list(totalproductions.Species.unique())
+    all_nodes = uniquecountry + uniquespecies
+
+    node_dict = {node: i for i, node in enumerate(all_nodes)}
+
+    sources = [node_dict[country] for country in totalproductions["Country"]]
+    target = [node_dict[locat] for locat in totalproductions["Species"]]
+    values = totalproductions["Production"].tolist()
+
+    
+    country_colors = px.colors.qualitative.Safe[:len(uniquecountry)] 
+    location_colors = px.colors.qualitative.Pastel[:len(uniquespecies)]  
+    node_colors = country_colors + location_colors  
+
+    fig = go.Figure(
+        go.Sankey(node=dict(
+            pad=15,
+            thickness=20,
+            label=all_nodes,
+            color=node_colors  # Her düğüme farklı renk atandı
         ),
-        yaxis=dict(
-            gridwidth = 1,
-            title_font=dict(size=18,color = "red"),  # Y eksen başlık yazı boyutu
-            tickfont=dict(size=14,color = "black")     # Y eksen işaret yazı boyutu
-        ),
-        coloraxis_colorbar=dict(
-            title="Species",        # Renk skalası başlığı
-            title_font=dict(size=16)  # Renk skalası başlık yazı boyutu
-        )
+        link=dict(
+            source=sources,
+            target=target,
+            value=values,
+            color="rgba(100, 100, 250, 0.3)"  # Bağlantıları saydam hale getirdik
+        ))
     )
-    return figure
+    fig.update_layout(
+        title = "Countries Species Production Using Sankey Chart"
+    )
+    return fig
+
 
     
 
@@ -564,6 +577,7 @@ def plot_countryspeciesprod_by_time(df,countries,species,years,locations = None,
     figure.for_each_annotation(lambda annotation: annotation.update(text=""))
     figure.for_each_yaxis(lambda yaxis: yaxis.update(tickfont=dict(color='black', size=15),title_font=dict(color='red', size=18)))
     figure.for_each_xaxis(lambda yaxis: yaxis.update(tickfont=dict(color='black', size=15),title_font=dict(color='red', size=18)))
+    figure.update_yaxes(matches=None, showticklabels=True)
     return figure
 
 

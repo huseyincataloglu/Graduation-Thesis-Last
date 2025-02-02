@@ -79,15 +79,43 @@ if choose ==  "Fishery Area":
             st.write("-------")
             st.plotly_chart(viz.plot_locbox_allyears(df,years,location))
 
-        cc1,_,cc2 = st.columns([1,0.2,1],vertical_alignment="top")
-        with cc1:
+        st.markdown("<h1 style='text-align: center; color: red;'>Country Section</h1>",unsafe_allow_html=True)
+        st.write("-------------------")
+        lc1,lc2= st.columns([1,1],vertical_alignment="top")
+        with lc1:
+            st.write("---------------")
             st.plotly_chart(viz.plot_locationproduction_increase(df,years,location))
             st.divider()
-            st.plotly_chart(viz.plot_locatspeciy_prod(df,years,location))
-        with cc2:
-            st.divider()
+            st.plotly_chart(viz.locatcountrprod_inc(df,years,location))
+        with lc2:
+            st.write("---------------")
             st.plotly_chart(viz.plot_top_count_byloc(df,years,location))
+            st.write("---------------")
+            st.plotly_chart(viz.locatcountry_meth(df,years,location))
+
+
+
+        st.write("-------------------")
+        st.markdown("<h1 style='text-align: center; color: red;'>Specy Section</h1>",unsafe_allow_html=True)
+        st.write("-------------------")
+        ls1,ls2 = st.columns([1,1],vertical_alignment="top")
+        with ls1:
+            st.plotly_chart(viz.plot_locaspecy_intime(df,years,location))
+        with ls2:
+            st.plotly_chart(viz.plot_locatspeciy_prod(df,years,location))
+        st.write("-------")
+        st.plotly_chart(viz.plot_locatspeciy_country(df,years,location))
+        st.plotly_chart(viz.plot_locatspecy_methods(df,years,location))
+        
+        st.write("--------------------------")
+        st.markdown("<h1 style='text-align: center; color: red;'>Method Section</h1>",unsafe_allow_html=True)
+        st.write("-------------------")
+        lm1,lm2 = st.columns(2)
+        with lm1:
+            st.plotly_chart(viz.plot_locamethods_bar(df,years,location))
+        with lm2:
             st.plotly_chart(viz.plot_locyprod_methods(df,years,location))
+
 
 elif choose == "Countries":
     country = st.selectbox("Select Country:",util.get_uniquefeature(df,"Country"))
@@ -102,21 +130,44 @@ elif choose == "Countries":
         with b:
             st.write(f"**Yearly Statistics**")
             st.dataframe(util.get_yearly_stats(df,"Country",country,years))
+        #st.write("----------")
+       # st.plotly_chart(viz.plot_rainbow_foryears(df,country,years))
+
     with c2:
         st.markdown("""<h2 style = 'text-align : center;'> Production Distributions</h3> """,unsafe_allow_html=True)
         st.write("-------")
         st.plotly_chart(viz.plot_countrybox_allyears(df,country,years))
+ 
 
-    
-    columnleft,_,columnright = st.columns([1,0.2,1])
-    with columnleft:
+    st.write("------------------------")
+    st.markdown("<h1 style='text-align: center; color: red;'>Location Section</h1>",unsafe_allow_html=True)
+    locleft,locrigth = st.columns([1,1])
+    with locleft:
         st.plotly_chart(viz.plot_prodcountry_incr(df,country,years))
-        st.write("------")
-        st.plotly_chart(viz.plot_countryspeciy_prod(df,country,years))
-    with columnright:
         st.plotly_chart(viz.plot_countries_region(df,country,years))
-        st.write("--------")
-        st.plotly_chart(viz.plot_countryprod_methods(df,country,years))
+    with locrigth:
+        st.plotly_chart(viz.plot_countryloc_inc(df,country,years))
+        st.plotly_chart(viz.plot_countryloc_method(df,country,years))
+
+    st.write("------------------------")
+    st.markdown("<h1 style='text-align: center; color: red;'>Specy Section</h1>",unsafe_allow_html=True)
+    specyleft,specyright = st.columns(2)
+    with specyleft:
+        st.plotly_chart(viz.plot_countryspeciy_pordline(df,country,years))
+        st.plotly_chart(viz.plot_countryspecy_methodprod(df,country,years))
+    with specyright:
+        st.plotly_chart(viz.plot_countryspeciy_prod(df,country,years))
+        st.plotly_chart(viz.plot_countryspecy_locatprod(df,country,years))
+
+    st.write("------------------------")
+    st.markdown("<h1 style='text-align: center; color: red;'>Method Section</h1>",unsafe_allow_html=True)
+    methodleft,methodright = st.columns(2)
+    with methodleft:
+        st.plotly_chart(viz.plot_prodmethod_incr(df,country,years))
+    with methodright:
+        st.plotly_chart(viz.plot_countryprod_methods(df,country,years))    
+
+
 
 elif choose == "Species":
     specy = st.selectbox("Select Specy:",util.get_uniquefeature(df,"Species"))
@@ -136,18 +187,38 @@ elif choose == "Species":
         st.write("-------")
         st.plotly_chart(viz.plot_specybox_allyears(df,specy,years))
 
+    st.write("-------")
+    st.markdown("<h1 style='text-align: center; color: red;'>Location Section</h1>",unsafe_allow_html=True)
     columnleft,_,columnright = st.columns([1,0.2,1])
     with columnleft:
         st.plotly_chart(viz.plot_prodspecy_incr(df,specy,years))
         st.write("------")
-        st.plotly_chart(viz.plot_top_count_species(df,specy,years))
+        st.plotly_chart(viz.plot_top_locforspecy(df,specy,years))
     with columnright:
-        st.plotly_chart(viz.plot_species_region(df,specy,years))
+        st.plotly_chart(viz.plot_specyloc_prodtime(df,specy,years))
         st.write("--------")
-        st.plotly_chart(viz.plot_specyprod_methods(df, specy,years))
+        st.plotly_chart(viz.plot_species_region(df,specy,years)) 
+
+    st.write("-------")
+    st.markdown("<h1 style='text-align: center; color: red;'>Country Section</h1>",unsafe_allow_html=True)    
+    loccont1,loccount2 = st.columns(2)
+    with loccont1:
+        st.plotly_chart(viz.plot_top_count_species(df,specy,years))
+        st.plotly_chart(viz.plot_top_specycountries_time(df,specy,years))
+    with loccount2:
+        st.plotly_chart(viz.plot_top_specycountr_method(df,specy,years))
+    st.plotly_chart(viz.plot_specycountry_sankey(df,specy,years))
+
+    st.write("-----------")
+    st.markdown("<h1 style='text-align: center; color: red;'>Method Section</h1>",unsafe_allow_html=True)
+    specymethod1 , specymethod2 = st.columns(2)
+    with specymethod1:
+        st.plotly_chart(viz.plot_specymethod_prodtime(df, specy,years))
             
-
-
+    with specymethod2:
+        st.subheader("Brief Explanation :")
+        st.write("In General, paralel category graph is used to expose the relations between categoric features, showing frequencies.However ı want to show production amount by coloring it")
+        st.plotly_chart(viz. plot_parallel_categories(df, specy,years))
 
 
 

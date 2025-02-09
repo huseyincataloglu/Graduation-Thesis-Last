@@ -15,7 +15,7 @@ st.set_page_config(
     
 
 # Veri yükleme
-df = pd.read_csv('data/FishStats2018.csv')
+df = pd.read_csv('data/FishStats2018_cleaned.csv')
 
 
 # Başlık
@@ -117,62 +117,16 @@ with cc1:
 
     allzeros = df[(df[df.columns[4:]] == 0).all(axis = 1)]
    
-
-years = df.columns[4:]
-graph = (df[years] == 0).sum() / len(df) * 100
-fig = px.line(graph, markers=True) 
-
-fig.update_traces(marker=dict(size=8))  
-
-fig.update_layout(
-    xaxis_title="Year",  
-    yaxis_title="Proportion",
-    font=dict(color="black"),
-    xaxis=dict(
-        gridwidth=1,
-        title_font=dict(size=18,color="red"), 
-        tickfont=dict(size=14,color="black")    
-        ),
-    yaxis=dict(
-        gridwidth=1,
-        title_font=dict(size=18,color="red"),  
-        tickfont=dict(size=14,color="black")    
-        )
-)
 with cc2:
-    duplicates = df[df.duplicated(keep = "first")]
-    st.subheader("Duplicated rows :")
-    st.dataframe(duplicates)
-allzeros = df[(df[df.columns[4:]] == 0).all(axis = 1)]
-st.write("The number of NaN values can give us an idea about dropping them. There are also a bunch of duplicate rows, which will be dropped before proceeding with visualization.")
-st.write("--------------------")
-st.subheader("The Zeros Issue")
-st.write(f"As we can see, the dataset includes too many zeros in its numeric columns. This leads to asymmetric data. The proportion of zeros to non-zeros is too high in the early years, but this gradually decreases in later years. Even {allzeros.shape[0]} rows contain only zeros in their numeric columns.")
-
-columnleft,columnright = st.columns(2)
-with columnleft:
-    st.plotly_chart(fig)
-with columnright:
-    st.dataframe(allzeros)
-
-st.write("----------------")
-st.subheader("Some arrangements in dataset :")
-production_mapping = {
-    "Capture production": "Capture",
-    "Aquaculture production (marine)": "Marine Aq",
-    "Aquaculture production (freshwater)": "Freshwater Aq",
-    "Aquaculture production (brackishwater)": "Brackish Aq"
-    }
-son1,son2 = st.columns(2)
-with son1:
+    st.subheader("Some arrangements in dataset :")
+    production_mapping = {
+        "Capture production": "Capture",
+        "Aquaculture production (marine)": "Marine Aq",
+        "Aquaculture production (freshwater)": "Freshwater Aq",
+        "Aquaculture production (brackishwater)": "Brackish Aq"
+        }
     st.write("In detail column, The name of production methods can be minimized for efficency and readablity")
     st.write(production_mapping)
-
-
-
-
-
-
 
 
 

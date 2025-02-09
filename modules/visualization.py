@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -12,6 +13,10 @@ def plot_locbox_allyears(df,years,location):
     df = df.groupby("Location")[years].sum().reset_index()
     df_melted= pd.melt(df,id_vars=["Location"],value_vars=years,var_name="Years",value_name="Production")
     figure = px.histogram(df_melted,x = "Production",marginal="box",title=f"{location}'s Distribution of Total Production Values from {start} to {end}")
+    figure.update_layout(
+        width = 800,
+        height = 500
+    )
     return figure
 
 
@@ -28,6 +33,7 @@ def plot_locationproduction_increase(df,years,location):
     fig.update_traces(line = dict(color = "#31333F",width = 3))
     fig.update_layout(xaxis_title="Years",yaxis_title="Production")
     fig.update_layout(
+        width = 600,
         font=dict(size=16),  # Yazı boyutu
         xaxis=dict(
             gridwidth=1,
@@ -70,7 +76,13 @@ def locatcountrprod_inc(df,years,locations):
     melted = pd.melt(gr,id_vars="Country",value_vars=years,value_name="Production",var_name="Years")
     grouped = df.groupby("Country")[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False).head(10)
     melted = melted[melted["Country"].isin(grouped["Country"].values)]
-    fig = px.scatter(melted,x = "Years",y = "Production",color="Country",size="Production",title=f"Which countries are most efficient in {locations} in years")
+
+    fig = px.scatter(melted,x = "Years",
+            y = "Production",
+            color="Country",
+            size="Production",
+            title=f"Which countries are most efficient in {locations} in years")
+    
     fig.update_layout(
         width = 700,
         height = 700,
@@ -122,6 +134,15 @@ def plot_top_count_byloc(df,years,location):
         color_continuous_scale="RdBu",
         title=title
     )
+    fig.update_layout(
+    width=1000,  # Adjust the width
+    height=600,  # Adjust the height if needed
+    geo=dict(
+        projection_type='natural earth',  # You can specify the type of projection
+        showcoastlines=True,  # Optional, to show coastlines
+        coastlinecolor="Black",  # Optional, to set the coastline color
+    )
+    )
     #fig.update_yaxes(categoryorder="total ascending")
     #fig.update_layout(
         #font=dict(size=16),
@@ -152,8 +173,8 @@ def plot_locaspecy_intime(df,years,location):
     melted = pd.melt(group,id_vars="Species",value_vars=years,var_name="Years",value_name="Production")
     fig = px.line(melted,x = "Years",y = "Production",color="Species",title=title)
     fig.update_layout(
-        width = 600,
-        height = 600,
+        width = 800,
+        height = 800,
         showlegend = True
     )
     return fig
@@ -164,53 +185,15 @@ def plot_locatspecy_methods(df,years,location):
     years = [str(year) for year in range(start,end+1,+1)]
     df = df[df["Location"] == location]
 
-    grouped = df.groupby(["Species","Detail"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False).head(30)
-    fig = px.treemap(grouped,names = "Species",values = "Production",path=[px.Constant("All"),"Detail","Species"],color="Detail",title=f"Top species produced by methods in {location}")
-    return fig
-
-def plot_locatspeciy_country(df,years,location):
-    start,end = years
-    years = [str(year) for year in range(start,end+1,+1)]
-    df = df[df["Location"] == location]
-    
-    grouped = df.groupby(["Species","Country"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False).head(20)
-    columns = ["Species","Country"]
-    for col in columns:
-        grouped[f"{col}_num"] = grouped[col].astype("category").cat.codes
-
-    dimensions = [
-        dict(range=[grouped[f"{col}_num"].min(), grouped[f"{col}_num"].max()],
-            label=f"{col}_num", values=grouped[f"{col}_num"])
-        for col in columns
-    ]
-    dimensions.append(
-        dict(range=[grouped["Production"].min(), grouped["Production"].max()],
-             label="Production", values=grouped["Production"])
-    )
-
-    fig = go.Figure(
-        data=go.Parcoords(
-            line=dict(
-                color=grouped["Species_num"],
-                showscale=True,
-            ),
-            dimensions=dimensions
-        )
-    )
-    st.subheader("Selected Dimensions")
-    c1,c2 = st.columns(2)
-    with c1:
-        st.dataframe(grouped[["Species", f"Species_num"]].drop_duplicates(subset=["Species"]))
-    with c2:
-        st.dataframe(grouped[["Country", f"Country_num"]].drop_duplicates(subset=["Country"]))
-
-    # Grafik düzenlemeleri
+    grouped = df.groupby(["Location","Detail","Country","Species"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
+    grouped = grouped[grouped.Production > 0]
+    fig = px.treemap(grouped,names = "Species",values = "Production",path=[px.Constant("All"),"Location","Detail","Country","Species"],color="Production",color_continuous_scale=px.colors.sequential.RdBu,title=f"Top Species Produced By Methods And Countries In {location}")
     fig.update_layout(
-        title = f"Top Species produced by countries in {location}",
-        font=dict(size=14),
-        margin=dict(l=50, r=50, t=50, b=50),
+        height = 1000,
+        margin = dict(t=50, l=25, r=25, b=25)
     )
     return fig
+
 
 
 
@@ -234,8 +217,8 @@ def plot_locatspeciy_prod(df,years,location):
         st.session_state.loctürsayfa = 1
 
 
-    # Butonları grafiğin altına taşı
-    col1, col2, col3 = st.columns([1, 1, 1])  # Her sütun aynı genişlikte
+    
+    col1, col2, col3 = st.columns([1, 1, 1])  
     with col1:
         geri_al = st.button("⬅️ Geri",key="loc-speciy")
     with col2:
@@ -257,16 +240,18 @@ def plot_locatspeciy_prod(df,years,location):
 
     fig = px.scatter(current_species,x = "Species",y = "Production",labels={"x":"Species","y":"Production"},color = "Production",color_continuous_scale = "RdBu",size="Production",title=title)
     fig.update_layout(
-        font=dict(size=16),  # Yazı boyutu
+        width = 700,
+        height = 700,
+        font=dict(size=16),  
         xaxis=dict(
             gridwidth=1,
-            title_font=dict(size=18, color="red"),  # X eksen başlık yazı rengi kırmızı
-            tickfont=dict(size=14, color="black")   # X eksen işaret yazı rengi siyah
+            title_font=dict(size=18, color="red"),  
+            tickfont=dict(size=14, color="black")   
         ),
         yaxis=dict(
             gridwidth=1,
-            title_font=dict(size=18, color="red"),  # Y eksen başlık yazı rengi kırmızı
-            tickfont=dict(size=14, color="black")   # Y eksen işaret yazı rengi siyah
+            title_font=dict(size=18, color="red"),  
+            tickfont=dict(size=14, color="black")   
         )
     )
     return fig
@@ -318,7 +303,29 @@ def plot_locyprod_methods(df,years,location):
 
 
 
+def plot_prodcountry_waterfall(df,country,years):
+    
+    start, end = years
+    years = [str(year) for year in range(start, end + 1,4)]
+    filtered_df = df[df["Country"] == country]
 
+    # 2️⃣ Yıllara Göre Üretimi Hesapla
+    total_production = filtered_df[years].sum()  
+    yearly_changes = total_production.diff().dropna()  
+
+    # 3️⃣ Waterfall Chart için DataFrame
+    waterfall_data = pd.DataFrame({
+        "Years": yearly_changes.index,
+        "Production Change": yearly_changes.values
+    })
+    fig = go.Figure()
+    fig.add_trace(go.Waterfall(x=waterfall_data["Years"], y=waterfall_data["Production Change"]))
+    fig.update_layout(
+        width = 700,
+        height = 700,
+        title = f"Production Change Of {country} Waterfall Chart", waterfallgap = 0.1
+    )
+    return fig
 
 def plot_prodcountry_incr(df, country, years):
     start, end = years
@@ -332,6 +339,8 @@ def plot_prodcountry_incr(df, country, years):
     total_production = df[years].sum()
     fig = px.line(total_production,x = total_production.index.astype(int),y = total_production.values,title=title)
     fig.update_layout(
+        width = 600,
+        height = 600,
         xaxis_title="Years",
         yaxis_title="Production",
         font=dict(size=16),
@@ -381,27 +390,40 @@ def plot_countryspeciy_pordline(df,country,years):
     melted = pd.melt(group,id_vars="Species",value_vars=years,var_name="Years",value_name="Production")
     fig = px.line(melted,x = "Years",y = "Production",color="Species",title=title)
     fig.update_layout(
-        showlegend = True
+        showlegend = True,
+        width =800,
+        height = 800
     )
     return fig
 
-def plot_countryspecy_methodprod(df,country,years):
-    start,end = years
-    years = [str(year) for year in range(start,end+1,+1)]
-    df = df[df["Country"] == country]
+def plot_countryspecy_methodprod(df, country, years):
+    start, end = years
+    years = [str(year) for year in range(start, end + 1)]
     
-    grouped = df.groupby(["Species","Detail"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
-    subplot_titles=[f"{detail}" for detail in grouped.Detail.unique()]
-    fig = make_subplots(rows =len(grouped.Detail.unique()),cols = 1,subplot_titles = subplot_titles)
+   
+    df = df[df["Country"] == country]
 
-    for i,detail in enumerate(grouped.Detail.unique(),start = 1):
-        filtered = grouped[grouped["Detail"] == detail].head(7)
-        trace = go.Bar(x=filtered["Species"], y=filtered["Production"], name=detail)
-        fig.add_trace(trace, row=i, col=1)
+    grouped = df.groupby(["Species", "Detail"])[years].sum().sum(axis=1).reset_index(name="Production").sort_values("Production",ascending = False).head(40)
 
-    fig.update_layout(height=300 * len(grouped.Detail.unique()), title_text="Top Species Production by Methods", showlegend=False)
 
-    return fig    
+    fig = px.bar(
+        grouped, 
+        x="Species", 
+        y="Production", 
+        color="Detail", 
+        title=f"Top Species and Their Production Methods in {country} ({start} - {end})",
+        labels={"Production": "Total Production", "Species": "Species", "Detail": "Method"},
+        barmode="stack"
+    )
+
+    fig.update_layout(
+        xaxis_tickangle=-45,
+        width = 1000,
+        height = 700,
+        bargap=0.2
+    )
+
+    return fig
 
 
 
@@ -410,12 +432,13 @@ def plot_countryspecy_locatprod(df,country,years):
     start,end = years
     years = [str(year) for year in range(start,end+1,+1)]
     if len(years) == 1:
-        title = f"Which Species are produced most in {country} with locations for {start}"
+        title = f"Which Species are produced most in {country} With Locations And Methods for {start}"
     else:
-        title = f"Which Locations Produce the Most Species in {country}? {start} - {end}" 
+        title = f"Top Species Produced in {country} by Location and Method from {start} to {end}"
     df = df[df["Country"] == country]
-    group = df.groupby(["Country","Location","Species"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending =False).head(20)
-    fig = px.sunburst(group,values="Production",path=["Country","Location","Species"],color="Location",title=title,color_continuous_scale="RdBu")
+    group = df.groupby(["Country","Location","Species","Detail"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending =False).head(40)
+    group = group[group.Production > 0]
+    fig = px.sunburst(group,values="Production",path=["Location","Detail","Country","Species"],color="Production",title=title,color_continuous_scale="RdBu")
     fig.update_layout(
         width = 800,
         height = 800
@@ -460,19 +483,10 @@ def plot_countryspeciy_prod(df,country,years):
     bitiş = başlangıç + sayfa_boyutu
     current_species = species_total_production.iloc[başlangıç:bitiş]
 
-    fig = px.scatter(current_species,x = "Species",y = "Production",labels={"x":"Species","y":"Production"},color = "Production",color_continuous_scale = "RdBu",size="Production",title=title)
+    fig = px.bar_polar(current_species,r = "Production",theta="Species",color = "Production",color_continuous_scale = "RdBu",title=title)
     fig.update_layout(
-        font=dict(size=16),  # Yazı boyutu
-        xaxis=dict(
-            gridwidth=1,
-            title_font=dict(size=18, color="red"),  # X eksen başlık yazı rengi kırmızı
-            tickfont=dict(size=14, color="black")   # X eksen işaret yazı rengi siyah
-        ),
-        yaxis=dict(
-            gridwidth=1,
-            title_font=dict(size=18, color="red"),  # Y eksen başlık yazı rengi kırmızı
-            tickfont=dict(size=14, color="black")   # Y eksen işaret yazı rengi siyah
-        )
+        width = 800,
+        height = 700
     )
     return fig
 
@@ -484,10 +498,10 @@ def plot_countries_region(df,country,years):
     else:
         title=f"On Which Areas {country} is effective most in {start} to {end}"
     df = df[df["Country"] == country]
-    grouped_by_location = df.groupby(["Location","Country"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False).head(4)
+    grouped_by_location = df.groupby(["Location","Country"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False).head(5)
     total_product = grouped_by_location["Production"].sum()
     grouped_by_location["Percentage"] = grouped_by_location["Production"] / total_product * 100
-    fig = go.Figure(data=[go.Pie(labels=grouped_by_location["Location"], values=grouped_by_location["Percentage"], pull=[0, 0, 0.2, 0.2])])
+    fig = go.Figure(data=[go.Pie(labels=grouped_by_location["Location"], values=grouped_by_location["Percentage"], pull=[0, 0, 0.2, 0.2,0.2])])
     
     #figure.update_traces(
     #    text=grouped_by_location["Percentage"].map(lambda x: f"{x:.1f}%"),
@@ -520,7 +534,12 @@ def plot_countryloc_inc(df,country,years):
         title=f"On Which Areas {country} is effective most in {start} Heatmap"
     else:
         title=f"On Which Areas {country} is effective most in {start} to {end} Heatmap"
-    grouped = df.groupby("Location")[years].sum().reset_index().head(5)
+    
+    most = df.groupby("Location")[years].sum().sum(axis=1).reset_index(name = "Production").sort_values("Production",ascending = False).head(8)
+    unique = most["Location"]
+    grouped = df.groupby("Location")[years].sum().reset_index()
+    grouped = grouped[grouped["Location"].isin(unique)]
+    grouped = grouped[grouped[years].sum(axis = 1) > 0]
     melted = pd.melt(grouped,id_vars="Location",value_vars=years,value_name="Production",var_name="Years")
     fig = go.Figure(data=go.Heatmap(
             z=melted["Production"],
@@ -529,6 +548,8 @@ def plot_countryloc_inc(df,country,years):
             colorscale='RdBu'
         ))
     fig.update_layout(
+        width = 700,
+        height = 600,
         title = title
     )
     return fig
@@ -539,7 +560,11 @@ def plot_countryloc_method(df,country,years):
     years = [str(year) for year in range(start,end+1,+1)]
     df = df[df["Country"] == country]
     grouped = df.groupby(["Location","Detail"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
-    fig = px.bar(grouped,x = "Detail",y = "Production",color = "Location",barmode="group",title = f"Which methods are widely used in {country}'s fishing areas ")
+    fig = px.bar(grouped,x = "Location",y = "Production",color = "Detail",barmode="stack",title = f"Which methods are widely used in {country}'s fishing areas ")
+    fig.update_layout(
+        width = 700,
+        height = 700
+    )
     return fig
     
 
@@ -547,9 +572,9 @@ def plot_countryprod_methods(df, country,years):
     start,end = years
     years = [str(year) for year in range(start,end+1,+1)]
     if len(years) == 1:
-        title=f"Production Methods Treemap for {country} in {start}"
+        title=f"Production Methods Funnel Area Chart for {country} in {start}"
     else:
-        title=f"Production Methods Treemap for {country} in {start} to {end}"
+        title=f"Production Methods Funnel Area Chart for {country} in {start} to {end}"
     df = df[df["Country"] == country]
     grouped_by_method = (
         df.groupby(["Detail", "Country"])[years]
@@ -559,14 +584,12 @@ def plot_countryprod_methods(df, country,years):
         .sort_values("Production", ascending=False)
     )
 
-    fig = px.treemap(
-        grouped_by_method,
-        names="Detail", 
-        values="Production",  
-        path=["Country", "Detail"],  
-        color="Production",  
-        color_continuous_scale="RdBu",  
-        title=title  
+    fig = px.funnel_area(
+        grouped_by_method,names="Detail",values="Production",color="Detail",color_discrete_sequence=px.colors.qualitative.Pastel1,title=title
+    )
+    fig.update_layout(
+        width = 700,
+        height = 600
     )
     return fig
 
@@ -579,6 +602,8 @@ def plot_countrybox_allyears(df,country,years):
     df_melted= pd.melt(df,id_vars=["Country"],value_vars=years,var_name="Years",value_name="Production")
     figure = px.histogram(df_melted,x = "Production",marginal="rug",title=f"{country}'s Distribution of Total Production Values from {start} to {end}")
     figure.update_layout(
+        width = 800,
+        height = 500,
         font=dict(size=16),  # Yazı boyutu
         xaxis=dict(
             title_font=dict(size=18, color="red"),  # X eksen başlık yazı rengi kırmızı
@@ -626,29 +651,33 @@ def plot_specybox_allyears(df,specy,years):
     df = df.groupby("Species")[years].sum().reset_index()
     df_melted= pd.melt(df,id_vars=["Species"],value_vars=years,var_name="Years",value_name="Production")
     figure = px.density_heatmap(df_melted,x = "Years",y = "Production",title=f"{specy}'s Distribution of Total Production Values from {start} to {end}",marginal_x="histogram",marginal_y="histogram",color_continuous_scale=px.colors.sequential.RdBu)
+    figure.update_layout(
+        width = 800,
+        height = 500
+    )
     return figure
 
 def plot_prodspecy_incr(df,specy,years):
-    start,end = years
-    years = [str(year) for year in range(start,end+1,+1)]
-    title = f"Production Change Over Years In {specy}"
-    df = df[df["Species"] == specy]
-    total_prodution = df[years].sum()
-    fig = px.line(total_prodution,x = total_prodution.index, y = total_prodution.values, labels={"x":"Years","y":"Production"},title=title)
-    fig.update_traces(line = dict(color = "#31333F",width = 3))
-    fig.update_layout(xaxis_title="Years",yaxis_title="Production")
+    start, end = years
+    years = [str(year) for year in range(start, end + 1,4)]
+    filtered_df = df[df["Species"] == specy]
+
+    # 2️⃣ Yıllara Göre Üretimi Hesapla
+    total_production = filtered_df[years].sum()  # Yıllık toplam üretim
+    yearly_changes = total_production.diff().dropna()  # Yıllık değişim farkı
+
+    # 3️⃣ Waterfall Chart için DataFrame
+    waterfall_data = pd.DataFrame({
+        "Years": yearly_changes.index,
+        "Production Change": yearly_changes.values
+    })
+    fig = go.Figure()
+    # 4️⃣ Waterfall Chart Çiz
+    fig.add_trace(go.Waterfall(x=waterfall_data["Years"], y=waterfall_data["Production Change"]))
     fig.update_layout(
-        font=dict(size=16),  # Yazı boyutu
-        xaxis=dict(
-            gridwidth=1,
-            title_font=dict(size=18, color="red"),  # X eksen başlık yazı rengi kırmızı
-            tickfont=dict(size=14, color="black")   # X eksen işaret yazı rengi siyah
-        ),
-        yaxis=dict(
-            gridwidth=1,
-            title_font=dict(size=18, color="red"),  # Y eksen başlık yazı rengi kırmızı
-            tickfont=dict(size=14, color="black")   # Y eksen işaret yazı rengi siyah
-        )
+        width = 700,
+        height = 700,
+        title = f"Production Change Of {specy} Waterfall Chart", waterfallgap = 0.1
     )
     return fig
 
@@ -657,13 +686,17 @@ def plot_specyloc_prodtime(df,specy,years):
     start,end = years
     years = [str(year) for year in range(start,end+1)]
     df = df[df["Species"] == specy]
+    most = df.groupby("Location")[years].sum().sum(axis=1).reset_index(name = "Production").sort_values("Production",ascending = False).head(8)
+    unique = most["Location"]
     grouped = df.groupby("Location")[years].sum().reset_index()
+    grouped = grouped[grouped["Location"].isin(unique)]
     melted = pd.melt(grouped,id_vars="Location",value_vars = years,value_name="Production",var_name="Years")
     figure = go.Figure()
     trace  = go.Heatmap(z=melted["Production"],x=melted["Years"],y = melted["Location"],colorscale="RdBu")
     figure.add_trace(trace=trace)
     figure.update_layout(
-        width = 600,
+        title = f"Production Distributions of {specy}'s most productive locations",
+        width = 800,
         height = 600
     )
     return figure
@@ -679,14 +712,12 @@ def plot_species_region(df,specy,years):
     else:
         title=f"{specy}'s production distributions in locations by mehthods.Icicle Graph"
     df = df[df["Species"] == specy]
-    grouped_by_location = df.groupby(["Location","Detail","Species"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
-    total_product = grouped_by_location["Production"].sum()
-    grouped_by_location["Percentage"] = grouped_by_location["Production"] / total_product * 100
-    figure = px.icicle(grouped_by_location,path=[px.Constant("All Production"),"Detail","Location","Species"],names="Location",values= "Production",color="Production",color_continuous_scale="RdBu",title=title)
+    grouped_by_location = df.groupby(["Location","Detail","Species","Country"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
+    grouped_by_location = grouped_by_location[grouped_by_location["Production"] > 0]
+    figure = px.icicle(grouped_by_location,path=[px.Constant("All Production"),"Location","Detail","Country","Species"],names="Location",values= "Production",color="Production",color_continuous_scale="RdBu",title=title)
 
     figure.update_layout(
-        width = 700,
-        height = 600
+        height =900
     )
     #figure.update_traces(
     #    text=grouped_by_location["Percentage"].map(lambda x: f"{x:.1f}%"),
@@ -735,7 +766,8 @@ def plot_parallel_categories(df, specy,years):
             .reset_index(name="Production")
             .sort_values("Production", ascending=False)
         )
-        fig = px.parallel_categories(grouped_by_method, dimensions=["Species", "Detail"],
+        nongrouped = df[["Species","Detail"]].merge(grouped_by_method,on=["Species","Detail"],how= "left")
+        fig = px.parallel_categories(nongrouped, dimensions=["Species", "Detail"],
                                  color="Production",
                                  color_continuous_scale=px.colors.sequential.RdBu,labels={"Species":f"{specy}","Detail":"Methods"})
         fig.update_layout(title=f"Production Methods for {specy} Using Paralel Category Chart",width = 600,height = 600)
@@ -743,18 +775,19 @@ def plot_parallel_categories(df, specy,years):
         return fig
 
 
-def plot_top_locforspecy(df,specy,years):
+""" def plot_top_locforspecy(df,specy,years):
     start ,end = years
     years = [str(year) for year in range(start,end+1)]
     df = df[df["Species"] == specy]
     top_countries = df.groupby('Location')[years].sum().sum(axis=1).reset_index(name='Production').sort_values('Production', ascending=False)
+    top_countries = top_countries[top_countries["Production"] > 0]
     fig = px.bar(top_countries,x = "Production", y = "Location",color  = "Production",color_continuous_scale="RdBu",title=f"In Which locations {specy} is produced most",orientation="h")
     fig.update_layout(
-        width = 600,
+        width = 700,
         height = 600
     )
     fig.update_yaxes(categoryorder="total ascending")
-    return fig
+    return fig """
 
 def plot_top_count_species(df,specy,years):
     start ,end = years
@@ -800,9 +833,16 @@ def plot_top_count_species(df,specy,years):
         title=title
     )
     fig.update_layout(
-        width = 700,
-        height = 600
-    )
+        width=1000,  # Adjust the width
+        height=600,  # Adjust the height if needed
+        geo=dict(
+            projection_type='natural earth',  # You can specify the type of projection
+            showcoastlines=True,  # Optional, to show coastlines
+            coastlinecolor="Black",  # Optional, to set the coastline color
+            lataxis_range=[-60, 85],  # Enlem aralığı (dünya haritasını sınırlar)
+            lonaxis_range=[-180, 180],  # Boylam aralığı
+        ),
+)
     #fig.update_yaxes(categoryorder="total ascending")
     #fig.update_layout(
         #font=dict(size=16),
@@ -832,7 +872,7 @@ def plot_top_specycountries_time(df,specy,years):
     fig = px.line(melt,x = "Years",y = "Production",color="Country",facet_col="Country",facet_col_wrap=2,facet_col_spacing=0.2,title=f"Top Countries production change for {specy}")
     fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
 
-    fig.update_yaxes(matches=None, showticklabels=True)
+    fig.update_yaxes(showticklabels=True)
 
     fig.update_layout(width=800, height=700)
 
@@ -846,26 +886,32 @@ def plot_specycountry_sankey(df, specy, years):
     years = [str(year) for year in range(start, end + 1, 10)]
     df = df[df["Species"] == specy]
 
-    grouped = df.groupby(["Country", "Location"])[years].sum().sum(axis=1).reset_index(name="Production").sort_values("Production", ascending=False).head(10)
+    grouped = df.groupby(["Country", "Location","Detail"])[years].sum().sum(axis=1).reset_index(name="Production").sort_values("Production", ascending=False).head(15)
 
     uniquecountry = list(grouped.Country.unique())
     uniquelocation = list(grouped.Location.unique())
-    all_nodes = uniquecountry + uniquelocation
+    uniquemethods = list(grouped.Detail.unique())
+    all_nodes = uniquecountry + uniquelocation + uniquemethods
 
     node_dict = {node: i for i, node in enumerate(all_nodes)}
 
     sources = [node_dict[country] for country in grouped["Country"]]
     target = [node_dict[locat] for locat in grouped["Location"]]
     values = grouped["Production"].tolist()
-
+    
+    sources += [node_dict[locat] for locat in grouped["Location"]]
+    target += [node_dict[detail] for detail in grouped["Detail"]]
+    values += grouped["Production"].tolist()
     # Farklı renkler atamak için renk paleti kullanma
     country_colors = px.colors.qualitative.Safe[:len(uniquecountry)]  # Ülkeler için renkler
     location_colors = px.colors.qualitative.Pastel[:len(uniquelocation)]  # Lokasyonlar için renkler
-    node_colors = country_colors + location_colors  # Tüm düğümler için birleşik renk listesi
+    method_colors = px.colors.qualitative.Pastel[:len(uniquelocation)]
+    node_colors = country_colors + location_colors + method_colors  # Tüm düğümler için birleşik renk listesi
 
+    link_colors = [node_colors[source] for source in sources]
     fig = go.Figure(
         go.Sankey(node=dict(
-            pad=15,
+            pad=20,
             thickness=20,
             label=all_nodes,
             color=node_colors  # Her düğüme farklı renk atandı
@@ -874,11 +920,14 @@ def plot_specycountry_sankey(df, specy, years):
             source=sources,
             target=target,
             value=values,
-            color="rgba(100, 100, 250, 0.3)"  # Bağlantıları saydam hale getirdik
+            color=link_colors  # Bağlantıları saydam hale getirdik
         ))
     )
 
-    fig.update_layout(title_text=f"Where the top countries produced most in {specy} production", font_size=12)
+    fig.update_layout(
+    title_text=f"Where the top countries produced most in {specy} production",
+    font=dict(size=20, color="white")
+    )
     return fig
 
 def plot_top_specycountr_method(df,specy,years):

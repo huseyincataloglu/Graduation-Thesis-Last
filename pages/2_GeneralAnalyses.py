@@ -52,16 +52,25 @@ if choose ==  "Fishery Area":
             st.write("-------")
             st.plotly_chart(oviz.plot_locationbox_allyears(df,years))
 
+        k1,k2 = st.columns([2,1])
+        with k1:
+            st.write("In this graph, values are evaluated dependently")
+            st.write("Most productive method ,most productive location using it and goes on ")
+            st.plotly_chart(oviz.plot_funnel_hiearchi(df,years))
+        with k2:
+            st.write("Top Productions table by all features independently")
+            st.table(uo.get_most_features(df,years))    
         cc1,_,cc2 = st.columns([1,0.2,1],vertical_alignment="top")
         with cc1:
-            st.plotly_chart(oviz.plot_production_increase(df,years))
+            st.plotly_chart(oviz.plot_production_increase(df,years),use_container_width=True)
             st.divider()
             st.plotly_chart(oviz.plot_top_species_by_production(df,years))
         with cc2:
             st.plotly_chart(oviz.plot_locations_by_prodution(df,years))
             st.divider()
-            st.plotly_chart(oviz.plot_top_countries_by_production(df,years))
             st.plotly_chart(oviz.plot_top_production_methods(df,years))
+
+        st.plotly_chart(oviz.plot_top_countries_by_production(df,years))    
     else:
         c1,c2 = st.columns([1,1])
         with c1:
@@ -101,7 +110,6 @@ if choose ==  "Fishery Area":
         with ls2:
             st.plotly_chart(viz.plot_locatspeciy_prod(df,years,location))
         st.write("-------")
-        st.plotly_chart(viz.plot_locatspeciy_country(df,years,location))
         st.plotly_chart(viz.plot_locatspecy_methods(df,years,location))
         
         st.write("--------------------------")
@@ -139,7 +147,7 @@ elif choose == "Countries":
     st.markdown("<h1 style='text-align: center; color: red;'>Location Section</h1>",unsafe_allow_html=True)
     locleft,locrigth = st.columns([1,1])
     with locleft:
-        st.plotly_chart(viz.plot_prodcountry_incr(df,country,years))
+        st.plotly_chart(viz.plot_prodcountry_waterfall(df,country,years))
         st.plotly_chart(viz.plot_countries_region(df,country,years))
     with locrigth:
         st.plotly_chart(viz.plot_countryloc_inc(df,country,years))
@@ -167,7 +175,7 @@ elif choose == "Countries":
 
 elif choose == "Species":
     specy = st.selectbox("Select Specy:",util.get_uniquefeature(df,"Species"))
-    c1,c2 = st.columns([1,1])
+    c1,_,c2 = st.columns([1,0.2,1])
     with c1:
         st.markdown("""<h2 style = 'text-align : center;'> Statistics</h3> """,unsafe_allow_html=True)
         st.write("-------")
@@ -189,20 +197,21 @@ elif choose == "Species":
     with columnleft:
         st.plotly_chart(viz.plot_prodspecy_incr(df,specy,years))
         st.write("------")
-        st.plotly_chart(viz.plot_top_locforspecy(df,specy,years))
+        #st.plotly_chart(viz.plot_top_locforspecy(df,specy,years))
     with columnright:
         st.plotly_chart(viz.plot_specyloc_prodtime(df,specy,years))
         st.write("--------")
-        st.plotly_chart(viz.plot_species_region(df,specy,years)) 
+
+    st.plotly_chart(viz.plot_species_region(df,specy,years)) 
 
     st.write("-------")
     st.markdown("<h1 style='text-align: center; color: red;'>Country Section</h1>",unsafe_allow_html=True)    
     loccont1,loccount2 = st.columns(2)
     with loccont1:
-        st.plotly_chart(viz.plot_top_count_species(df,specy,years))
-        st.plotly_chart(viz.plot_top_specycountries_time(df,specy,years))
+        st.plotly_chart(viz.plot_top_count_species(df,specy,years),use_container_width=True)
     with loccount2:
-        st.plotly_chart(viz.plot_top_specycountr_method(df,specy,years))
+        #st.plotly_chart(viz.plot_top_specycountr_method(df,specy,years))
+        st.plotly_chart(viz.plot_top_specycountries_time(df,specy,years))
     st.plotly_chart(viz.plot_specycountry_sankey(df,specy,years))
 
     st.write("-----------")

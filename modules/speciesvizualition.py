@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -118,15 +119,138 @@ def plot_participation_by_species(df, species, years,locations = None,methods = 
     else:
         return None    
 
-def plot_partvsprod_by_species(df, species, years,locations = None,methods = None,countries = None):
+
+def plot_proddistspecies_yearly(df, species, years):
+    years = [str(year) for year in years]
+    
+    if len(species) == 0:
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No species selected. Please select at least one country.",
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=16, color="red")
+        )
+        fig.update_layout(
+            title="No Data Available",
+            showlegend=False,
+            height=400,
+            width=600,
+        )
+        return fig
+
+    df = df[df["Species"].isin(species)]
+
+    # Eğer yıllar seçilmemişse, uyarı ver ve boş grafik döndür
+    if len(years) == 0:
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No years selected. Please select at least one year.",
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=16, color="red")
+        )
+        fig.update_layout(
+            title="No Data Available",
+            height=400,
+            width=600,
+            showlegend=False
+        )
+        return fig
+    
+    türler = df.Species.unique()
+    türrenkleri = {tür: f"rgb({np.random.randint(0, 255)}, {np.random.randint(0, 255)}, {np.random.randint(0, 255)})" for tür in türler}
+    #
+    fig = go.Figure()
+
+    for year in years:
+        
+        year_data = df[df["Species"].isin(species)][["Species", str(year)]]
+
+        for specy in species:
+            specy_data = year_data[year_data["Species"] == specy]
+            fig.add_trace(
+                go.Box(
+                    x=[year] * len(specy_data), 
+                    y=specy_data[str(year)],     
+                    name=specy,                  
+                    marker=dict(color=türrenkleri[specy]),
+                    showlegend=(year == years[0])              
+                )
+            )
+
+    
+    fig.update_layout(
+        title="Production Distribution By Year And Specy",
+        xaxis_title="Year",
+        yaxis_title="Production",
+        height=600,
+        width=1000,
+        showlegend=True,
+        boxmode = "group"
+    )
+    return fig
+
+
+def plot_speciesmethpd_paralelcat(df, species, years):
     start, end = years
     years = [str(year) for year in range(start, end + 1)]
-    if locations:
-            df = df[df["Location"].isin(locations)]
-    if methods:
-        df = df[df["Detail"].isin(methods)]
-    if countries:
-        df = df[df["Country"].isin(countries)]
+
+    
+    if not species:
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No species selected. Please select at least one species.",
+            x=0.5, y=0.5,
+            xref="paper", yref="paper",
+            showarrow=False,
+            font=dict(size=16, color="red")
+        )
+        fig.update_layout(
+            title="No Data Available",
+            showlegend=False,
+            height=400, width=600,
+        )
+        return fig
+
+    df = df[df["Species"].isin(species)]
+
+    method_grouped = df.groupby(["Species", "Detail"])[years].sum().sum(axis=1).reset_index(name="Total Production")
+    method_part = df.loc[:, ["Species", "Detail"]]
+    method_part = method_part.merge(method_grouped, on=["Species", "Detail"], how="left")
+   
+    fig = px.parallel_categories(
+        method_part,
+        dimensions=["Species", "Detail"],
+        color="Total Production",
+        color_continuous_scale="Viridis", 
+        title="Species and Methods Frequencies Colored by Total Production"
+    )
+
+    fig.update_layout(
+        title=dict(font=dict(color="black")),
+        font=dict(size=18), 
+        coloraxis_colorbar=dict(
+            title="Production",
+            title_font=dict(size=16),
+            tickfont=dict(size=14)
+        ),
+        paper_bgcolor="white", 
+        plot_bgcolor="white",
+        margin=dict(l=50, r=50, t=80, b=50)  
+    )
+
+    return fig
+
+def plot_partvsprod_by_species(df, species, years):
+    start, end = years
+    years = [str(year) for year in range(start, end + 1)]
     if len(species) == 0:
         fig = go.Figure()
         fig.add_annotation(
@@ -154,17 +278,13 @@ def plot_partvsprod_by_species(df, species, years,locations = None,methods = Non
 
         figure = px.scatter(df1, x = "Participation Count", y = "Production",color = "Species",title= "Total Participation vs Total Production Amount",size="Production")
         figure.update_layout(
-            title=dict(font=dict(size=24, color="red")),
+            title=dict(font=dict(size=20, color="black")),
             font=dict(size=16),  # Yazı boyutu
             xaxis=dict(
-                gridwidth=1,
-                title_font=dict(size=18,color="red"),  # X eksen başlık yazı boyutu
-                tickfont=dict(size=14,color="black")     # X eksen işaret yazı boyutu
+                gridwidth=1    
             ),
             yaxis=dict(
-                gridwidth=1,
-                title_font=dict(size=18,color="red"),  # Y eksen başlık yazı boyutu
-                tickfont=dict(size=14,color="black")     # Y eksen işaret yazı boyutu
+                gridwidth=1
             ),
             coloraxis_colorbar=dict(     
                 title_font=dict(size=16)  # Renk skalası başlık yazı boyutu
@@ -174,99 +294,486 @@ def plot_partvsprod_by_species(df, species, years,locations = None,methods = Non
 
 
 
-    
-
-def plot_speciesprdouction_by_detail(df,species,years,locations =None):
-    start,end = years
-    years = [str(year) for year in range(start,end + 1,+1)]
-    if locations :
-        df = df[df["Location"].isin(locations)]
-    
-    speciyproductions = df.groupby(["Species","Detail","Location","Country"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending = False)
-    filteredspeciesproductions = speciyproductions[speciyproductions.Species.isin(species)]
-    figure = px.icicle(filteredspeciesproductions,values="Production",path=[px.Constant("All"),"Detail","Location","Species"],color="Production",color_continuous_scale="RdBu",title="Icicle Chart of Species Production With Location Filter")
-    figure.update_layout(
-        title=dict(
-            font=dict(size=22,color = "red")  # Başlık yazı boyutu
-        ),
-        font=dict(size=16),  # Yazı boyutu
-        coloraxis_colorbar=dict(
-            title="Production",        # Renk skalası başlığı
-            title_font=dict(size=16)  # Renk skalası başlık yazı boyutu
-        )
-    )
-    return figure
-
-def plot_species_overyears(df, species, years, locations=None, methods=None, countries=None):
+def plot_species_overyears(df, species, years):
     start, end = years
     years1 = [str(year) for year in range(start, end + 1, +1)]
-    
-    if locations:
-        df = df[df["Location"].isin(locations)]
-    if methods:
-        df = df[df["Detail"].isin(methods)]
-    if countries:
-        df = df[df["Country"].isin(countries)]
     
     topcountries = df.groupby("Species")[years1].sum().reset_index()
     melted = pd.melt(topcountries, id_vars=["Species"], value_vars=years1)
     melted = melted[melted["Species"].isin(species)]
     melted.rename({"variable": "Years", "value": "Production"}, axis=1, inplace=True)
     
-    figure = px.area(
-        melted,
-        x="Years",
-        y="Production",
-        color="Species",
-        color_discrete_sequence=px.colors.sequential.RdBu,
-        facet_col_wrap=2,
-        facet_col="Species"
+    fig = go.Figure()
+    for specy in species:
+        filtered = melted[melted["Species"] == specy]
+        fig.add_trace(go.Bar(x=filtered["Years"],y=filtered["Production"], name=f'{specy}'))
+                 
+    fig.update_layout(
+        title=dict(text='Species Production Distributions Over Time'),
+        height = 700,
+        legend=dict(
+            x=0,
+            y=1.0,
+            bgcolor='rgba(255, 255, 255, 0)',
+            bordercolor='rgba(255, 255, 255, 0)'
+        ),
+        barmode='stack',
+        bargap=0.15,
+        bargroupgap=0.1
     )
+    return fig
+
+
+
+
+def plot_speciesmethods_overyears(df, species, years,methods):
+    start, end = years
+    years1 = [str(year) for year in range(start, end + 1, 3)]
     
-    figure.update_layout(
-        title=dict(
-            text="Species Production Over Years",
-            font=dict(size=22,color = "red")  # Başlık yazı boyutu
+    df = df[df["Detail"].isin(methods)]
+    topcountries = df.groupby(["Species","Detail"])[years1].sum().reset_index()
+    melted = pd.melt(topcountries, id_vars=["Species","Detail"], value_vars=years1)
+    melted = melted[melted["Species"].isin(species)]
+    melted.rename({"variable": "Years", "value": "Production"}, axis=1, inplace=True)
+    
+    if len(species) == 1:
+        fig = px.bar(melted,x = "Years",y = "Production",color="Detail",color_discrete_sequence=px.colors.qualitative.Set1)
+        fig.update_layout(
+        title=dict(text='Specy And Related Methods Production Distributions Over Time'),
+        height = 700,
+        legend=dict(
+            x=0,
+            y=1.0,
+            bgcolor='rgba(255, 255, 255, 0)',
+            bordercolor='rgba(255, 255, 255, 0)'
         ),
-        font=dict(size=16),  # Genel yazı boyutu
-        xaxis=dict(
-            gridwidth=1,
-            title_font=dict(size=18, color="red"),  # X eksen başlık yazı boyutu ve rengi
-            tickfont=dict(size=14, color="black")  # X eksen işaret yazı boyutu ve rengi
-        ),
-        yaxis=dict(
-            gridwidth=1,
-            title_font=dict(size=18, color="red"),  # Y eksen başlık yazı boyutu ve rengi
-            tickfont=dict(size=14, color="black")  # Y eksen işaret yazı boyutu ve rengi
-        ),
-        coloraxis_colorbar=dict(
-            title_font=dict(size=16)  # Renk skalası başlık yazı boyutu
+        barmode='stack',
+        bargap=0.15, # gap between bars of adjacent location coordinates.
+        bargroupgap=0.1 # gap between bars of the same location coordinate.
         )
+        return fig
+
+    pattern_list = [
+        "-",  # Yatay çizgi
+        "|",  # Dikey çizgi
+        "+",  # Artı işareti
+        "/",  # Eğik çizgi
+        "\\", # Ters eğik çizgi
+        "x",  # Çarpı işareti
+        "."   # Nokta
+    ]
+    pattern_map = [pattern_list[i] for i,detail in enumerate(df.Detail.unique(),start = 0)]
+    fig  = px.bar(melted,x = "Years",y = "Production",color="Species",pattern_shape="Detail",pattern_shape_sequence=pattern_map,color_discrete_sequence=px.colors.qualitative.Plotly)
+                 
+    fig.update_layout(
+        title=dict(text='Species And Related Methods Production Distributions Over Time'),
+        height = 700,
+        legend=dict(
+            x=0,
+            y=1.0,
+            bgcolor='rgba(255, 255, 255, 0)',
+            bordercolor='rgba(255, 255, 255, 0)'
+        ),
+        barmode='stack',
+        bargap=0.15, # gap between bars of adjacent location coordinates.
+        bargroupgap=0.1 # gap between bars of the same location coordinate.
     )
+    return fig
 
-    figure.update_xaxes(
-        title_font=dict(size=18, color="red"),  # Başlık yazı boyutu ve rengi
-        tickfont=dict(size=14, color="black")  # İşaret yazı boyutu ve rengi
+
+def plot_specieslocats_overyears(df, species, years,locations):
+    start, end = years
+    years1 = [str(year) for year in range(start, end + 1, 3)]
+    
+    df = df[df["Location"].isin(locations)]
+    topcountries = df.groupby(["Species","Location"])[years1].sum().reset_index()
+    melted = pd.melt(topcountries, id_vars=["Species","Location"], value_vars=years1)
+    melted = melted[melted["Species"].isin(species)]
+    melted.rename({"variable": "Years", "value": "Production"}, axis=1, inplace=True)
+    
+    if len(species) == 1:
+        fig = px.bar(melted,x = "Years",y = "Production",color="Location",color_discrete_sequence=px.colors.qualitative.Plotly)
+        fig.update_layout(
+        title=dict(text='Specy And Related Methods Production Distributions Over Time'),
+        height = 700,
+        legend=dict(
+            x=0,
+            y=1.0,
+            bgcolor='rgba(255, 255, 255, 0)',
+            bordercolor='rgba(255, 255, 255, 0)'
+        ),
+        barmode='stack',
+        bargap=0.15, # gap between bars of adjacent location coordinates.
+        bargroupgap=0.1 # gap between bars of the same location coordinate.
+        )
+        return fig
+
+    pattern_list = [
+        "-",  # Yatay çizgi
+        "|",  # Dikey çizgi
+        "+",  # Artı işareti
+        "/",  # Eğik çizgi
+        "\\", # Ters eğik çizgi
+        "x",  # Çarpı işareti
+        "."   # Nokta
+    ]
+    pattern_map = [pattern_list[i] for i,loc in enumerate(df.Location.unique(),start = 0)]
+    fig  = px.bar(melted,x = "Years",y = "Production",color="Species",pattern_shape="Location",pattern_shape_sequence=pattern_map,color_discrete_sequence=px.colors.qualitative.Plotly)
+                 
+    fig.update_layout(
+        title=dict(text='Species And Related Locations Production Distributions Over Time'),
+        height = 700,
+        legend=dict(
+            x=0,
+            y=1.0,
+            bgcolor='rgba(255, 255, 255, 0)',
+            bordercolor='rgba(255, 255, 255, 0)'
+        ),
+        barmode='stack',
+        bargap=0.15, # gap between bars of adjacent location coordinates.
+        bargroupgap=0.1 # gap between bars of the same location coordinate.
     )
-    figure.update_yaxes(
-        title_font=dict(size=18, color="red"),  # Başlık yazı boyutu ve rengi
-        tickfont=dict(size=14, color="black")  # İşaret yazı boyutu ve rengi
+    return fig
+
+
+def plot_specieslocats_methodsoveryears(df, species, years,locations,methods):
+    start, end = years
+    years1 = [str(year) for year in range(start, end + 1, 3)]
+    
+    df = df[df["Location"].isin(locations)]
+    df = df[df["Detail"].isin(methods)]
+    topcountries = df.groupby(["Species","Location","Detail"])[years1].sum().reset_index()
+    melted = pd.melt(topcountries, id_vars=["Species","Location","Detail"], value_vars=years1)
+    melted = melted[melted["Species"].isin(species)]
+    melted.rename({"variable": "Years", "value": "Production"}, axis=1, inplace=True)
+    
+    if len(species) == 1:
+        pattern_list = [
+            "-",  # Yatay çizgi
+            "|",  # Dikey çizgi
+            "+",  # Artı işareti
+            "/",  # Eğik çizgi
+            "\\", # Ters eğik çizgi
+            "x",  # Çarpı işareti
+            "."   # Nokta
+        ]
+        pattern_map = [pattern_list[i] for i,loc in enumerate(df.Detail.unique(),start = 0)]
+        fig = px.bar(melted,x = "Years",y = "Production",color="Location",color_discrete_sequence=px.colors.qualitative.Plotly,pattern_shape="Detail",pattern_shape_sequence=pattern_map)
+        fig.update_layout(
+        title=dict(text='Specy,Location And Related Methods Production Distributions Over Time'),
+        height = 700,
+        legend=dict(
+            x=0,
+            y=1.0,
+            bgcolor='rgba(255, 255, 255, 0)',
+            bordercolor='rgba(255, 255, 255, 0)'
+        ),
+        barmode='stack',
+        bargap=0.15, # gap between bars of adjacent location coordinates.
+        bargroupgap=0.1 # gap between bars of the same location coordinate.
+        )
+        return fig
+
+    pattern_list = [
+        "-",  # Yatay çizgi
+         "|",  # Dikey çizgi
+        "+",  # Artı işareti
+        "/",  # Eğik çizgi
+        "\\", # Ters eğik çizgi
+        "x",  # Çarpı işareti
+        "."   # Nokta
+    ]
+    pattern_map = [pattern_list[i] for i,detal in enumerate(df.Detail.unique(),start = 0)]
+    fig  = px.bar(melted,x = "Years",y = "Production",color="Location",pattern_shape="Detail",pattern_shape_sequence=pattern_map,color_discrete_sequence=px.colors.qualitative.Plotly,facet_col="Species",facet_col_spacing=0.1)
+                 
+    fig.update_layout(
+        title_text="Species, Methods, and Related Locations Production Over Time",
+        xaxis_title="Years",
+        yaxis_title="Total Production",
+        plot_bgcolor='white',
+        height=700,
+        legend=dict(
+            x=0, y=1.0,
+            bgcolor='rgba(255, 255, 255, 0)',
+            bordercolor='rgba(255, 255, 255, 0)'
+        ),
+        barmode='stack',
+        bargap=0.15,
+        bargroupgap=0.1
     )
+    return fig
 
 
-    return figure
+def plot_specieslocats_countroveryears(df, species, years,locations,countries):
+    start, end = years
+    years1 = [str(year) for year in range(start, end + 1, 3)]
+    
+    df = df[df["Location"].isin(locations)]
+    df = df[df["Country"].isin(countries)]
+    topcountries = df.groupby(["Species","Location","Country"])[years1].sum().reset_index()
+    melted = pd.melt(topcountries, id_vars=["Species","Location","Country"], value_vars=years1)
+    melted = melted[melted["Species"].isin(species)]
+    melted.rename({"variable": "Years", "value": "Production"}, axis=1, inplace=True)
 
-def plot_speciescountry_parallel(df, species, years, countries=None):
+    if len(species) == 1:
+        pattern_list = [
+            "-",  # Yatay çizgi
+            "|",  # Dikey çizgi
+            "+",  # Artı işareti
+            "/",  # Eğik çizgi
+            "\\", # Ters eğik çizgi
+            "x",  # Çarpı işareti
+            "."   # Nokta
+        ]
+        pattern_map = [pattern_list[i] for i,locat in enumerate(df.Location.unique(),start = 0)]
+        fig = px.bar(melted,x = "Years",y = "Production",color="Country",color_discrete_sequence=px.colors.qualitative.Set1,pattern_shape="Location",pattern_shape_sequence=pattern_map)
+        fig.update_layout(
+        title=dict(text='Specy,Location And Related Countries Production Distributions Over Time'),
+        height = 700,
+        legend=dict(
+            x=0,
+            y=1.0,
+            bgcolor='rgba(255, 255, 255, 0)',
+            bordercolor='rgba(255, 255, 255, 0)'
+        ),
+        barmode='stack',
+        bargap=0.15, # gap between bars of adjacent location coordinates.
+        bargroupgap=0.1 # gap between bars of the same location coordinate.
+        )
+        return fig
+
+    pattern_list = [
+            "-",  # Yatay çizgi
+            "|",  # Dikey çizgi
+            "+",  # Artı işareti
+            "/",  # Eğik çizgi
+            "\\", # Ters eğik çizgi
+            "x",  # Çarpı işareti
+            "."   # Nokta
+        ]
+    pattern_map = [pattern_list[i] for i,locat in enumerate(df.Location.unique(),start = 0)]
+    fig  = px.bar(melted,x = "Years",y = "Production",color="Country",pattern_shape="Location",pattern_shape_sequence=pattern_map,color_discrete_sequence=px.colors.qualitative.Set1,facet_col="Species",facet_col_spacing=0.1)
+                 
+    fig.update_layout(
+        title=dict(text='Species,Methods And Related Locations Production Distributions Over Time'),
+        height = 700,
+        legend=dict(
+            x=0,
+            y=1.0,
+            bgcolor='rgba(255, 255, 255, 0)',
+            bordercolor='rgba(255, 255, 255, 0)'
+        ),
+        barmode='stack',
+        bargap=0.15, # gap between bars of adjacent location coordinates.
+        bargroupgap=0.1 # gap between bars of the same location coordinate.
+    )
+    return fig
+
+
+def plot_speciesountries_overyears(df, species, years,countries):
+    start, end = years
+    years1 = [str(year) for year in range(start, end + 1, 3)]
+    
+    df = df[df["Country"].isin(countries)]
+    topcountries = df.groupby(["Species","Country"])[years1].sum().reset_index()
+    melted = pd.melt(topcountries, id_vars=["Species","Country"], value_vars=years1)
+    melted = melted[melted["Species"].isin(species)]
+    melted.rename({"variable": "Years", "value": "Production"}, axis=1, inplace=True)
+    
+    if len(species) == 1:
+        fig = px.bar(melted,x = "Years",y = "Production",color="Country",color_discrete_sequence=px.colors.qualitative.Set1)
+        fig.update_layout(
+        title=dict(text='Specy And Related Countries Production Distributions Over Time'),
+        height = 700,
+        legend=dict(
+            x=0,
+            y=1.0,
+            bgcolor='rgba(255, 255, 255, 0)',
+            bordercolor='rgba(255, 255, 255, 0)'
+        ),
+        barmode='stack',
+        bargap=0.15, # gap between bars of adjacent location coordinates.
+        bargroupgap=0.1 # gap between bars of the same location coordinate.
+        )
+        return fig
+
+    pattern_list = [
+        "-",  # Yatay çizgi
+        "|",  # Dikey çizgi
+        "+",  # Artı işareti
+        "/",  # Eğik çizgi
+        "\\", # Ters eğik çizgi
+        "x",  # Çarpı işareti
+        "."   # Nokta
+    ]
+    pattern_map = [pattern_list[i] for i,countr in enumerate(df.Country.unique(),start = 0)]
+    fig  = px.bar(melted,x = "Years",y = "Production",color="Species",pattern_shape="Country",pattern_shape_sequence=pattern_map,color_discrete_sequence=px.colors.qualitative.Set1)
+                 
+    fig.update_layout(
+        title=dict(text='Species And Related Countries Production Distributions Over Time'),
+        height = 700,
+        legend=dict(
+            x=0,
+            y=1.0,
+            bgcolor='rgba(255, 255, 255, 0)',
+            bordercolor='rgba(255, 255, 255, 0)'
+        ),
+        barmode='stack',
+        bargap=0.15, # gap between bars of adjacent location coordinates.
+        bargroupgap=0.1 # gap between bars of the same location coordinate.
+    )
+    return fig
+
+
+def plot_speciesmethod_countoveryears(df, species, years,methods,countries):
+    start, end = years
+    years1 = [str(year) for year in range(start, end + 1, 3)]
+    
+    df = df[df["Country"].isin(countries)]
+    df = df[df["Detail"].isin(methods)]
+    topcountries = df.groupby(["Species","Country","Detail"])[years1].sum().reset_index()
+    melted = pd.melt(topcountries, id_vars=["Species","Country","Detail"], value_vars=years1)
+    melted = melted[melted["Species"].isin(species)]
+    melted.rename({"variable": "Years", "value": "Production"}, axis=1, inplace=True)
+    
+    if len(species) == 1:
+        pattern_list = [
+        "-",  # Yatay çizgi
+        "|",  # Dikey çizgi
+        "+",  # Artı işareti
+        "/",  # Eğik çizgi
+        "\\", # Ters eğik çizgi
+        "x",  # Çarpı işareti
+        "."   # Nokta
+        ]
+        pattern_map = [pattern_list[i] for i,loc in enumerate(df.Detail.unique(),start = 0)]
+        fig = px.bar(melted,x = "Years",y = "Production",color="Country",color_discrete_sequence=px.colors.qualitative.Set1,pattern_shape="Detail",pattern_shape_sequence=pattern_map)
+        fig.update_layout(
+        title=dict(text='Specy,Countries And Related Methods Production Distributions Over Time'),
+        height = 700,
+        legend=dict(
+            x=0,
+            y=1.0,
+            bgcolor='rgba(255, 255, 255, 0)',
+            bordercolor='rgba(255, 255, 255, 0)'
+        ),
+        barmode='stack',
+        bargap=0.15, # gap between bars of adjacent location coordinates.
+        bargroupgap=0.1 # gap between bars of the same location coordinate.
+        )
+        return fig
+
+    pattern_list = [
+        "-",  # Yatay çizgi
+        "|",  # Dikey çizgi
+        "+",  # Artı işareti
+        "/",  # Eğik çizgi
+        "\\", # Ters eğik çizgi
+        "x",  # Çarpı işareti
+        "."   # Nokta
+    ]
+    pattern_map = [pattern_list[i] for i,detal in enumerate(df.Detail.unique(),start = 0)]
+    fig  = px.bar(melted,x = "Years",
+                y = "Production",
+                color="Country",
+                pattern_shape="Detail",
+                pattern_shape_sequence=pattern_map,
+                color_discrete_sequence=px.colors.qualitative.Set1,
+                facet_col="Species",
+                facet_col_spacing=0.1)
+                 
+    fig.update_layout(
+        title=dict(text='Species,Methods And Related Countries Production Distributions Over Time'),
+        height = 700,
+        legend=dict(
+            x=0,
+            y=1.0,
+            bgcolor='rgba(255, 255, 255, 0)',
+            bordercolor='rgba(255, 255, 255, 0)'
+        ),
+        barmode='stack',
+        bargap=0.15, # gap between bars of adjacent location coordinates.
+        bargroupgap=0.1 # gap between bars of the same location coordinate.
+    )
+    return fig
+
+
+def plot_specieslocat_methcountroveryears(df, species, years,locations,methods,countries):
+    start, end = years
+    years1 = [str(year) for year in range(start, end + 1, 3)]
+    
+    df = df[df["Location"].isin(locations)]
+    df = df[df["Detail"].isin(methods)]
+    df = df[df["Country"].isin(countries)]
+    topcountries = df.groupby(["Species","Location","Detail","Country"])[years1].sum().reset_index()
+    melted = pd.melt(topcountries, id_vars=["Species","Location","Detail","Country"], value_vars=years1)
+    melted = melted[melted["Species"].isin(species)]
+    melted.rename({"variable": "Years", "value": "Production"}, axis=1, inplace=True)
+
+    if len(species) == 1:
+        pattern_list = [
+            "-",  # Yatay çizgi
+            "|",  # Dikey çizgi
+            "+",  # Artı işareti
+            "/",  # Eğik çizgi
+            "\\", # Ters eğik çizgi
+            "x",  # Çarpı işareti
+            "."   # Nokta
+        ]
+        pattern_map = [pattern_list[i] for i,loc in enumerate(df.Detail.unique(),start = 0)]
+        fig = px.bar(melted,x = "Years",y = "Production",color="Country",color_discrete_sequence=px.colors.qualitative.Set1,pattern_shape="Detail",pattern_shape_sequence=pattern_map,facet_col="Location",facet_col_spacing=0.07,facet_col_wrap=4,facet_row_spacing=0.1)
+        fig.update_layout(
+        title=dict(text='Specy,Location,Methods And Related Location Production Distributions Over Time'),
+        height = 700,
+        legend=dict(
+            x=0,
+            y=1.0,
+            bgcolor='rgba(255, 255, 255, 0)',
+            bordercolor='rgba(255, 255, 255, 0)'
+        ),
+        barmode='stack',
+        bargap=0.15, # gap between bars of adjacent location coordinates.
+        bargroupgap=0.1 # gap between bars of the same location coordinate.
+        )
+        return fig
+
+    pattern_list = [
+        "-",  # Yatay çizgi
+        "|",  # Dikey çizgi
+        "+",  # Artı işareti
+        "/",  # Eğik çizgi
+        "\\", # Ters eğik çizgi
+        "x",  # Çarpı işareti
+        "."   # Nokta
+    ]
+    pattern_map = [pattern_list[i] for i,detal in enumerate(df.Detail.unique(),start = 0)]
+    fig  = px.bar(melted,x = "Years",y = "Production",color="Country",pattern_shape="Detail",pattern_shape_sequence=pattern_map,color_discrete_sequence=px.colors.qualitative.Set1,facet_col="Species",facet_col_spacing=0.1,facet_row="Location",facet_row_spacing=0.07)
+                 
+    fig.update_layout(
+        title=dict(text='Species,Methods,Countries And Related Locations Production Distributions Over Time'),
+        height = 700,
+        legend=dict(
+            x=0,
+            y=1.0,
+            bgcolor='rgba(255, 255, 255, 0)',
+            bordercolor='rgba(255, 255, 255, 0)'
+        ),
+        barmode='stack',
+        bargap=0.15, # gap between bars of adjacent location coordinates.
+        bargroupgap=0.1 # gap between bars of the same location coordinate.
+    )
+    return fig
+
+
+def plot_speciespolar(df, species, years):
     start, end = years
     listyears = [str(year) for year in range(start, end + 1, 1)]
     
-    # Ülkeleri filtrele (eğer varsa)
-    if countries:
-        df = df[df["Country"].isin(countries)]
-    else:
+   
+    if len(species) == 0:
         fig = go.Figure()
         fig.add_annotation(
-            text="No countries selected. Please select at least one country.",
+            text="No species selected. Please select at least one specy.",
             x=0.5,
             y=0.5,
             xref="paper",
@@ -281,41 +788,637 @@ def plot_speciescountry_parallel(df, species, years, countries=None):
             width=600,
         )
         return fig
-    # Türleri filtrele
-    df = df[df["Species"].isin(species)]    
-    
-    # Yeni veri çerçevesi oluştur: Sadece gerekli sütunlar
-    newdf = df.loc[:, ["Species", "Detail", "Country"] + listyears]
-    
-    # Üretim toplamını hesapla
-    newdf2 = df.groupby(["Species", "Detail", "Country"])[listyears].sum().sum(axis=1).reset_index(name="Production")
-    
-    # Yeni üretim değerini eski veri çerçevesine ekle
-    newdf = newdf.merge(newdf2, on=["Species", "Detail", "Country"], how="left")
-    
-    # Parallel categories grafiği oluştur
-    fig = px.parallel_categories(newdf, dimensions=["Species", "Detail", "Country"],
-                                 color="Production",  # Renklendirme için 'Production' değerini kullan
-                                 color_continuous_scale=px.colors.sequential.Plasma,  # Sürekli renk skalası
-                                 title="Parallel Category Chart,Species and Production by Country and Detail")
-    
-    fig.update_layout(
-        title=dict(
-            font=dict(size=22,color = "red")  # Başlık yazı boyutu
-        ),
-        font=dict(size=12),
-        coloraxis_colorbar=dict(title="Production")
-    )
-    
-    return fig
+    else:
+        df = df[df["Species"].isin(species)]
+        grouped = df.groupby("Species")[listyears].sum().sum(axis=1).reset_index(name="Production")
+        
+        fig = px.bar_polar(
+            grouped,
+            r="Production",
+            theta="Species",
+            color="Production",
+            title="🌿 Species Total Productions (Polar Bar Chart)",
+            color_continuous_scale=px.colors.sequential.Tealgrn
+        )
+        
+        # 📌 **Gelişmiş Grafik Düzenlemeleri**
+        fig.update_traces(marker=dict(
+            line=dict(color="black", width=1.5),  # Çubukların kenar çizgisi
+            opacity=0.8  # Hafif şeffaflık ekleyerek daha yumuşak bir görünüm sağlar
+        ))
 
-def plot_parallel_corgrapyearly(df, species, years, locations=None, methods=None, countries=None):
-    # Veriyi filtreleme
-    filtered_df = df.copy()
+        fig.update_layout(
+            width=850,
+            height=850,
+            polar=dict(
+                bgcolor="#f8f9fa",  # Arkaplanı açık gri yaparak şık bir görünüm
+                angularaxis=dict(showgrid=False, linewidth=1, linecolor="gray"),
+                radialaxis=dict(showgrid=True, gridcolor="lightgray", gridwidth=0.5)
+            ),
+            title_font=dict(size=20, family="Arial", color="#2C3E50"),  # Başlık stili
+            coloraxis_colorbar=dict(
+                title="Production Level", tickfont=dict(size=12)
+            )
+        )
+        return fig
+
+def plot_speciesmethodspolar(df, species, years,methods):
+    start, end = years
+    listyears = [str(year) for year in range(start, end + 1, 1)]
+    
+    pattern_list = [
+        "-",  # Yatay çizgi
+        "|",  # Dikey çizgi
+        "+",  # Artı işareti
+        "/",  # Eğik çizgi
+        "\\", # Ters eğik çizgi
+        "x",  # Çarpı işareti
+        "."   # Nokta
+    ]
+    if len(species) == 0:
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No species selected. Please select at least one specy.",
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=16, color="red")
+        )
+        fig.update_layout(
+            title="No Data Available",
+            showlegend=False,
+            height=400,
+            width=600,
+        )
+        return fig
+    else:
+        df = df[df["Species"].isin(species)]
+        df = df[df["Detail"].isin(methods)]
+        grouped = df.groupby(["Species","Detail"])[listyears].sum().sum(axis=1).reset_index(name="Production")
+        
+        if len(species) > 1:
+            fig = px.bar_polar(
+                grouped,
+                r="Production",
+                theta="Species",
+                color="Detail",
+                title="🌿 Species And Methods Total Productions (Polar Bar Chart)",
+                color_discrete_sequence=px.colors.qualitative.Set1
+            )
+            
+            # 📌 **Gelişmiş Grafik Düzenlemeleri**
+            fig.update_traces(marker=dict(
+                line=dict(color="black", width=1.5),  # Çubukların kenar çizgisi
+                opacity=0.8  # Hafif şeffaflık ekleyerek daha yumuşak bir görünüm sağlar
+            ))
+
+            fig.update_layout(
+                width=850,
+                height=850,
+                polar=dict(
+                    bgcolor="#f8f9fa",  # Arkaplanı açık gri yaparak şık bir görünüm
+                    angularaxis=dict(showgrid=False, linewidth=1, linecolor="gray"),
+                    radialaxis=dict(showgrid=True, gridcolor="lightgray", gridwidth=0.5)
+                ),
+                title_font=dict(size=20, family="Arial", color="#2C3E50"),  # Başlık stili
+                coloraxis_colorbar=dict(tickfont=dict(size=12)
+                )
+            )
+            return fig
+        else:
+            fig = px.bar_polar(
+                grouped,
+                r="Production",
+                theta="Detail",
+                color="Detail",
+                title="🌿 Specy And Methods Total Productions (Polar Bar Chart)",
+                color_discrete_sequence=px.colors.qualitative.Set1
+            )
+            
+            # 📌 **Gelişmiş Grafik Düzenlemeleri**
+            fig.update_traces(marker=dict(
+                line=dict(color="black", width=1.5),  # Çubukların kenar çizgisi
+                opacity=0.8  # Hafif şeffaflık ekleyerek daha yumuşak bir görünüm sağlar
+            ))
+
+            fig.update_layout(
+                width=850,
+                height=850,
+                polar=dict(
+                    bgcolor="#f8f9fa",  # Arkaplanı açık gri yaparak şık bir görünüm
+                    angularaxis=dict(showgrid=False, linewidth=1, linecolor="gray"),
+                    radialaxis=dict(showgrid=True, gridcolor="lightgray", gridwidth=0.5)
+                ),
+                title_font=dict(size=20, family="Arial", color="#2C3E50"),  # Başlık stili
+                coloraxis_colorbar=dict(tickfont=dict(size=12)
+                )
+            )
+            return fig
+
+    
+
+def plot_speciescountries_polar(df, species, years,countries):
+    start, end = years
+    listyears = [str(year) for year in range(start, end + 1, 1)]
+    
+    pattern_list = [
+        "-",  # Yatay çizgi
+        "|",  # Dikey çizgi
+        "+",  # Artı işareti
+        "/",  # Eğik çizgi
+        "\\", # Ters eğik çizgi
+        "x",  # Çarpı işareti
+        "."   # Nokta
+    ]
+    if len(species) == 0:
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No species selected. Please select at least one specy.",
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=16, color="red")
+        )
+        fig.update_layout(
+            title="No Data Available",
+            showlegend=False,
+            height=400,
+            width=600,
+        )
+        return fig
+    else:
+        df = df[df["Species"].isin(species)]
+        df = df[df["Country"].isin(countries)]
+        grouped = df.groupby(["Species","Country"])[listyears].sum().sum(axis=1).reset_index(name="Production")
+        
+        if len(species) > 1:
+            fig = px.bar_polar(
+                grouped,
+                r="Production",
+                theta="Species",
+                color="Country",
+                title="🌿 Species And Countries Total Productions (Polar Bar Chart)",
+                color_discrete_sequence=px.colors.qualitative.Set1
+            )
+            
+            # 📌 **Gelişmiş Grafik Düzenlemeleri**
+            fig.update_traces(marker=dict(
+                line=dict(color="black", width=1.5),  # Çubukların kenar çizgisi
+                opacity=0.8  # Hafif şeffaflık ekleyerek daha yumuşak bir görünüm sağlar
+            ))
+
+            fig.update_layout(
+                width=850,
+                height=850,
+                polar=dict(
+                    bgcolor="#f8f9fa",  # Arkaplanı açık gri yaparak şık bir görünüm
+                    angularaxis=dict(showgrid=False, linewidth=1, linecolor="gray"),
+                    radialaxis=dict(showgrid=True, gridcolor="lightgray", gridwidth=0.5)
+                ),
+                title_font=dict(size=20, family="Arial", color="#2C3E50"),  # Başlık stili
+                coloraxis_colorbar=dict(tickfont=dict(size=12)
+                )
+            )
+            return fig
+        else:
+            fig = px.bar_polar(
+                grouped,
+                r="Production",
+                theta="Country",
+                color="Country",
+                title="🌿 Specy And Countries Total Productions (Polar Bar Chart)",
+                color_discrete_sequence=px.colors.qualitative.Set1
+            )
+            
+            # 📌 **Gelişmiş Grafik Düzenlemeleri**
+            fig.update_traces(marker=dict(
+                line=dict(color="black", width=1.5),  # Çubukların kenar çizgisi
+                opacity=0.8  # Hafif şeffaflık ekleyerek daha yumuşak bir görünüm sağlar
+            ))
+
+            fig.update_layout(
+                width=850,
+                height=850,
+                polar=dict(
+                    bgcolor="#f8f9fa",  # Arkaplanı açık gri yaparak şık bir görünüm
+                    angularaxis=dict(showgrid=False, linewidth=1, linecolor="gray"),
+                    radialaxis=dict(showgrid=True, gridcolor="lightgray", gridwidth=0.5)
+                ),
+                title_font=dict(size=20, family="Arial", color="#2C3E50"),  # Başlık stili
+                coloraxis_colorbar=dict(tickfont=dict(size=12)
+                )
+            )
+            return fig
+
+
+def plot_specieslocat_polar(df, species, years,locations):
+    start, end = years
+    listyears = [str(year) for year in range(start, end + 1, 1)]
+    
+    pattern_list = [
+        "-",  # Yatay çizgi
+        "|",  # Dikey çizgi
+        "+",  # Artı işareti
+        "/",  # Eğik çizgi
+        "\\", # Ters eğik çizgi
+        "x",  # Çarpı işareti
+        "."   # Nokta
+    ]
+    if len(species) == 0:
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No species selected. Please select at least one specy.",
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=16, color="red")
+        )
+        fig.update_layout(
+            title="No Data Available",
+            showlegend=False,
+            height=400,
+            width=600,
+        )
+        return fig
+    else:
+        df = df[df["Species"].isin(species)]
+        df = df[df["Location"].isin(locations)]
+        grouped = df.groupby(["Species","Location"])[listyears].sum().sum(axis=1).reset_index(name="Production")
+        
+        if len(species) > 1:
+            fig = px.bar_polar(
+                grouped,
+                r="Production",
+                theta="Species",
+                color="Location",
+                title="🌿 Species And Locations Total Productions (Polar Bar Chart)",
+                color_discrete_sequence=px.colors.qualitative.Set1
+            )
+            
+            # 📌 **Gelişmiş Grafik Düzenlemeleri**
+            fig.update_traces(marker=dict(
+                line=dict(color="black", width=1.5),  # Çubukların kenar çizgisi
+                opacity=0.8  # Hafif şeffaflık ekleyerek daha yumuşak bir görünüm sağlar
+            ))
+
+            fig.update_layout(
+                width=850,
+                height=850,
+                polar=dict(
+                    bgcolor="#f8f9fa",  # Arkaplanı açık gri yaparak şık bir görünüm
+                    angularaxis=dict(showgrid=False, linewidth=1, linecolor="gray"),
+                    radialaxis=dict(showgrid=True, gridcolor="lightgray", gridwidth=0.5)
+                ),
+                title_font=dict(size=20, family="Arial", color="#2C3E50"),  # Başlık stili
+                coloraxis_colorbar=dict(tickfont=dict(size=12)
+                )
+            )
+            return fig
+        else:
+            fig = px.bar_polar(
+                grouped,
+                r="Production",
+                theta="Location",
+                color="Location",
+                title="🌿 Specy And Locations Total Productions (Polar Bar Chart)",
+                color_discrete_sequence=px.colors.qualitative.Set1
+            )
+            
+            # 📌 **Gelişmiş Grafik Düzenlemeleri**
+            fig.update_traces(marker=dict(
+                line=dict(color="black", width=1.5),  # Çubukların kenar çizgisi
+                opacity=0.8  # Hafif şeffaflık ekleyerek daha yumuşak bir görünüm sağlar
+            ))
+
+            fig.update_layout(
+                width=850,
+                height=850,
+                polar=dict(
+                    bgcolor="#f8f9fa",  # Arkaplanı açık gri yaparak şık bir görünüm
+                    angularaxis=dict(showgrid=False, linewidth=1, linecolor="gray"),
+                    radialaxis=dict(showgrid=True, gridcolor="lightgray", gridwidth=0.5)
+                ),
+                title_font=dict(size=20, family="Arial", color="#2C3E50"),  # Başlık stili
+                coloraxis_colorbar=dict(tickfont=dict(size=12)
+                )
+            )
+            return fig
+
+
+def plot_speciesmethods_locatpolar(df, species, years,locations,methods):
+    start, end = years
+    listyears = [str(year) for year in range(start, end + 1, 1)]
+    
+    pattern_list = [
+        "-",  # Yatay çizgi
+        "|",  # Dikey çizgi
+        "+",  # Artı işareti
+        "/",  # Eğik çizgi
+        "\\", # Ters eğik çizgi
+        "x",  # Çarpı işareti
+        "."   # Nokta
+    ]
+    if len(species) == 0:
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No species selected. Please select at least one specy.",
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=16, color="red")
+        )
+        fig.update_layout(
+            title="No Data Available",
+            showlegend=False,
+            height=400,
+            width=600,
+        )
+        return fig
+    else:
+        df = df[df["Species"].isin(species)]
+        df = df[df["Detail"].isin(methods)]
+        df = df[df["Location"].isin(locations)]
+        grouped = df.groupby(["Species","Detail","Location"])[listyears].sum().sum(axis=1).reset_index(name="Production")
+        
+        if len(species) == 1:
+            fig = px.bar_polar(
+                grouped,
+                r="Production",
+                theta="Location",
+                color="Detail",
+                title="🌿 Specy ,Location And Methods Total Productions (Polar Bar Chart)",
+                color_discrete_sequence=px.colors.qualitative.Set1
+            )
+            
+            # 📌 **Gelişmiş Grafik Düzenlemeleri**
+            fig.update_traces(marker=dict(
+                line=dict(color="black", width=1.5),  # Çubukların kenar çizgisi
+                opacity=0.8  # Hafif şeffaflık ekleyerek daha yumuşak bir görünüm sağlar
+            ))
+
+            fig.update_layout(
+                width=850,
+                height=850,
+                polar=dict(
+                    bgcolor="#f8f9fa",  # Arkaplanı açık gri yaparak şık bir görünüm
+                    angularaxis=dict(showgrid=False, linewidth=1, linecolor="gray"),
+                    radialaxis=dict(showgrid=True, gridcolor="lightgray", gridwidth=0.5)
+                ),
+                title_font=dict(size=20, family="Arial", color="#2C3E50"),  # Başlık stili
+                coloraxis_colorbar=dict(tickfont=dict(size=12)
+                )
+            )
+            return fig
+        else:
+            fig = px.bar_polar(
+                grouped,
+                r="Production",
+                theta="Species",
+                color="Location",
+                pattern_shape="Detail",
+                pattern_shape_sequence=pattern_list,
+                title="🌿 Species ,Location And Methods Total Productions (Polar Bar Chart)",
+                color_discrete_sequence=px.colors.qualitative.Set1
+            )
+            
+            # 📌 **Gelişmiş Grafik Düzenlemeleri**
+            fig.update_traces(marker=dict(
+                line=dict(color="black", width=1.5),  # Çubukların kenar çizgisi
+                opacity=0.8  # Hafif şeffaflık ekleyerek daha yumuşak bir görünüm sağlar
+            ))
+
+            fig.update_layout(
+                width=850,
+                height=850,
+                polar=dict(
+                    bgcolor="#f8f9fa",  # Arkaplanı açık gri yaparak şık bir görünüm
+                    angularaxis=dict(showgrid=False, linewidth=1, linecolor="gray"),
+                    radialaxis=dict(showgrid=True, gridcolor="lightgray", gridwidth=0.5)
+                ),
+                title_font=dict(size=20, family="Arial", color="#2C3E50"),  # Başlık stili
+                coloraxis_colorbar=dict(tickfont=dict(size=12)
+                )
+            )
+            return fig
+
+        
+def plot_speciescountr_methodpolar(df, species, years,methods,countries):
+    start, end = years
+    listyears = [str(year) for year in range(start, end + 1, 1)]
+    
+    pattern_list = [
+        "-",  # Yatay çizgi
+        "|",  # Dikey çizgi
+        "+",  # Artı işareti
+        "/",  # Eğik çizgi
+        "\\", # Ters eğik çizgi
+        "x",  # Çarpı işareti
+        "."   # Nokta
+    ]
+    if len(species) == 0:
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No species selected. Please select at least one specy.",
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=16, color="red")
+        )
+        fig.update_layout(
+            title="No Data Available",
+            showlegend=False,
+            height=400,
+            width=600,
+        )
+        return fig
+    else:
+        df = df[df["Species"].isin(species)]
+        df = df[df["Country"].isin(countries)]
+        df = df[df["Detail"].isin(methods)]
+        grouped = df.groupby(["Species","Country","Detail"])[listyears].sum().sum(axis=1).reset_index(name="Production")
+        
+        if len(species) == 1:
+            fig = px.bar_polar(
+                grouped,
+                r="Production",
+                theta="Country",
+                color="Detail",
+                title="🌿 Specy ,Methods And Countries Total Productions (Polar Bar Chart)",
+                color_discrete_sequence=px.colors.qualitative.Set1
+            )
+            
+           
+            fig.update_traces(marker=dict(
+                line=dict(color="black", width=1.5), 
+                opacity=0.8  
+            ))
+
+            fig.update_layout(
+                width=850,
+                height=850,
+                polar=dict(
+                    bgcolor="#f8f9fa",  # Arkaplanı açık gri yaparak şık bir görünüm
+                    angularaxis=dict(showgrid=False, linewidth=1, linecolor="gray"),
+                    radialaxis=dict(showgrid=True, gridcolor="lightgray", gridwidth=0.5)
+                ),
+                title_font=dict(size=20, family="Arial", color="#2C3E50"),  # Başlık stili
+                coloraxis_colorbar=dict(tickfont=dict(size=12)
+                )
+            )
+            return fig
+        else:
+            fig = px.bar_polar(
+                grouped,
+                r="Production",
+                theta="Species",
+                color="Country",
+                pattern_shape="Detail",
+                pattern_shape_sequence=pattern_list,
+                title="🌿 Species ,Method And Countries Total Productions (Polar Bar Chart)",
+                color_discrete_sequence=px.colors.qualitative.Set1
+            )
+            
+            
+            fig.update_traces(marker=dict(
+                line=dict(color="black", width=1.5),  
+                opacity=0.8 
+            ))
+
+            fig.update_layout(
+                width=850,
+                height=850,
+                polar=dict(
+                    bgcolor="#f8f9fa",  
+                    angularaxis=dict(showgrid=False, linewidth=1, linecolor="gray"),
+                    radialaxis=dict(showgrid=True, gridcolor="lightgray", gridwidth=0.5)
+                ),
+                title_font=dict(size=20, family="Arial", color="#2C3E50"),  
+                coloraxis_colorbar=dict(tickfont=dict(size=12)
+                )
+            )
+            return fig
+
+
+def plot_speciescountr_locatpolar(df, species, years,locations,countries):
+    start, end = years
+    listyears = [str(year) for year in range(start, end + 1, 1)]
+    
+    pattern_list = [
+        "-",  # Yatay çizgi
+        "|",  # Dikey çizgi
+        "+",  # Artı işareti
+        "/",  # Eğik çizgi
+        "\\", # Ters eğik çizgi
+        "x",  # Çarpı işareti
+        "."   # Nokta
+    ]
+    if len(species) == 0:
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No species selected. Please select at least one specy.",
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=16, color="red")
+        )
+        fig.update_layout(
+            title="No Data Available",
+            showlegend=False,
+            height=400,
+            width=600,
+        )
+        return fig
+    else:
+        df = df[df["Species"].isin(species)]
+        df = df[df["Country"].isin(countries)]
+        df = df[df["Location"].isin(locations)]
+        grouped = df.groupby(["Species","Country","Location"])[listyears].sum().sum(axis=1).reset_index(name="Production")
+        
+        if len(species) == 1:
+            fig = px.bar_polar(
+                grouped,
+                r="Production",
+                theta="Country",
+                color="Location",
+                title="🌿 Specy ,Locations And Countries Total Productions (Polar Bar Chart)",
+                color_discrete_sequence=px.colors.qualitative.Set1
+            )
+            
+            # 📌 **Gelişmiş Grafik Düzenlemeleri**
+            fig.update_traces(marker=dict(
+                line=dict(color="black", width=1.5),  # Çubukların kenar çizgisi
+                opacity=0.8  # Hafif şeffaflık ekleyerek daha yumuşak bir görünüm sağlar
+            ))
+
+            fig.update_layout(
+                width=850,
+                height=850,
+                polar=dict(
+                    bgcolor="#f8f9fa",  # Arkaplanı açık gri yaparak şık bir görünüm
+                    angularaxis=dict(showgrid=False, linewidth=1, linecolor="gray"),
+                    radialaxis=dict(showgrid=True, gridcolor="lightgray", gridwidth=0.5)
+                ),
+                title_font=dict(size=20, family="Arial", color="#2C3E50"),  # Başlık stili
+                coloraxis_colorbar=dict(tickfont=dict(size=12)
+                )
+            )
+            return fig
+        else:
+            fig = px.bar_polar(
+                grouped,
+                r="Production",
+                theta="Species",
+                color="Country",
+                pattern_shape="Location",
+                pattern_shape_sequence=pattern_list,
+                title="🌿 Species ,Locations And Countries Total Productions (Polar Bar Chart)",
+                color_discrete_sequence=px.colors.qualitative.Set1
+            )
+            
+            # 📌 **Gelişmiş Grafik Düzenlemeleri**
+            fig.update_traces(marker=dict(
+                line=dict(color="black", width=1.5),  # Çubukların kenar çizgisi
+                opacity=0.8  # Hafif şeffaflık ekleyerek daha yumuşak bir görünüm sağlar
+            ))
+
+            fig.update_layout(
+                width=850,
+                height=850,
+                polar=dict(
+                    bgcolor="#f8f9fa",  # Arkaplanı açık gri yaparak şık bir görünüm
+                    angularaxis=dict(showgrid=False, linewidth=1, linecolor="gray"),
+                    radialaxis=dict(showgrid=True, gridcolor="lightgray", gridwidth=0.5)
+                ),
+                title_font=dict(size=20, family="Arial", color="#2C3E50"),  # Başlık stili
+                coloraxis_colorbar=dict(tickfont=dict(size=12)
+                )
+            )
+            return fig
+
+
+
+
+def plot_histogram_yearlytotal(df, species, years):
+    start, end = years
+    years = [str(year) for year in range(start, end + 1, 1)]
+    df = df[df["Species"].isin(species)]    
+
     if len(years) == 0:
         fig = go.Figure()
         fig.add_annotation(
-            text="No years selected. Please select at least one year.",
+            text="No years selected. Please select at least one year or species.",
             x=0.5,
             y=0.5,
             xref="paper",
@@ -328,149 +1431,86 @@ def plot_parallel_corgrapyearly(df, species, years, locations=None, methods=None
             showlegend=False,
             height=400,
             width=600,
+            hoverinfo="x+y+name"
         )
         return fig
-    # Türleri filtrele
-    filtered_df = filtered_df[filtered_df["Species"].isin(species)]
-
-    # Lokasyonları filtrele
-    if locations:
-        filtered_df = filtered_df[filtered_df["Location"].isin(locations)]
-
-    # Yöntemleri filtrele
-    if methods:
-        filtered_df = filtered_df[filtered_df["Detail"].isin(methods)]
-
-    # Ülkeleri filtrele
-    if countries:
-        filtered_df = filtered_df[filtered_df["Country"].isin(countries)]
-
-    # Türleri sayısallaştırma (renk kodlama için)
-    filtered_df["Species_num"] = filtered_df["Species"].astype("category").cat.codes
-    st.write("Species Cordinates")
-    st.dataframe(pd.DataFrame(pd.Series(filtered_df["Species_num"].unique(),index =filtered_df["Species"].unique())).reset_index().rename(columns = {"index": "Species", 0: "Species_num"}))
-    # Yılları seçme
-    year_cols = [str(year) for year in years if str(year) in filtered_df.columns]
-    if not year_cols:
-        raise ValueError("Seçilen yıllar, veri çerçevesinde mevcut değil.")
-
-    # Paralel koordinat grafiği için boyutlar oluşturma
-    dimensions = [
-        dict(
-            range=[filtered_df[col].min(), filtered_df[col].max()],
-            label=col,  # Eksen adı
-            values=filtered_df[col],  # Eksen değerleri
-            tickformat=".0f",  # Sayı biçimlendirme
+    else:
+        df = df[df["Species"].isin(species)]
+        df = df.groupby("Species")[years].sum().reset_index()
+        melted= pd.melt(df,id_vars="Species",value_vars=years,value_name="Production",var_name="Years")
+        figure = px.histogram(melted,x = "Production",color="Species",marginal="box",title="Annual Total Production Distribution By Species")
+        figure.update_layout(
+            title=dict(font=dict(size=15, color="black")),
+            height = 800
         )
-        for col in year_cols
-    ]
-    # Türler için boyut ekleme (renk ve kategori)
-    dimensions.insert(0, dict(
-        tickvals=filtered_df["Species_num"].unique(),
-        label="Species",
-        values=filtered_df["Species_num"],
-    ))
-
-    # Paralel koordinat grafiği oluşturma
-    fig = go.Figure(
-        data=go.Parcoords(
-            line=dict(
-                color=filtered_df["Species_num"],
-                colorscale='viridis',
-                showscale=True
-            ),
-            dimensions=dimensions
-        )
-    )
-
-    # Grafik düzenlemeleri
-    fig.update_layout(
-        font=dict(size=14),  # Genel yazı tipi
-        margin=dict(l=50, r=50, t=50, b=50),  # Kenar boşlukları
-    )
-    return fig
+        return figure
 
 
 
-
-def plot_parallel_corgrap(df, species, years, locations=None, methods=None, countries=None):
-    # Yıllar aralığını oluştur
+def plot_specylocatmethods_countr_sankey(df, species, years, locations, methods, countries):
     start, end = years
-    years = [str(year) for year in range(start, end + 1)]
+    years = [str(year) for year in range(start, end + 1, 1)]
+
+    df = df[df["Species"].isin(species)]
+    df = df[df["Location"].isin(locations)]
+    df = df[df["Detail"].isin(methods)]
+    df = df[df["Country"].isin(countries)]
+
+    totalproductions = df.groupby(["Country", "Location", "Detail", "Species"])[years].sum().sum(axis=1).reset_index(name="Production").sort_values("Production", ascending=False)
     
-    # Veriyi filtreleme
-    filtered_df = df.copy()
+    uniquecountry = list(totalproductions.Country.unique())
+    uniquelocations = list(totalproductions.Location.unique())
+    uniquedetails = list(totalproductions.Detail.unique())
+    uniquespecies = list(totalproductions.Species.unique())
+    all_nodes = uniquecountry + uniquelocations + uniquedetails + uniquespecies
 
-    # Türleri filtrele
-    filtered_df = filtered_df[filtered_df["Species"].isin(species)]
+    node_dict = {node: i for i, node in enumerate(all_nodes)}
 
-    # Lokasyonları filtrele
-    if locations:
-        filtered_df = filtered_df[filtered_df["Location"].isin(locations)]
+    sources = [node_dict[specy] for specy in totalproductions["Species"]]
+    target = [node_dict[detail] for detail in totalproductions["Detail"]]
+    values = totalproductions["Production"].tolist()
 
-    # Yöntemleri filtrele
-    if methods:
-        filtered_df = filtered_df[filtered_df["Detail"].isin(methods)]
+    sources += [node_dict[detail] for detail in totalproductions["Detail"]]
+    target += [node_dict[locat] for locat in totalproductions["Location"]]
+    values += totalproductions["Production"].tolist()
 
-    # Ülkeleri filtrele
-    if countries:
-        filtered_df = filtered_df[filtered_df["Country"].isin(countries)]
-
-    # Yıllara göre toplam üretimi ekle
-    filtered_df["Total Production"] = filtered_df[years].sum(axis=1)
-
-    # Gruplama: Tür temel alınır, seçilen diğer argümanlara göre gruplanır
-    group_columns = ["Species"]  # Tür her zaman temel
-    if locations:
-        group_columns.append("Location")
-    if methods:
-        group_columns.append("Detail")
-    if countries:
-        group_columns.append("Country")
-
-    grouped_df = filtered_df.groupby(group_columns, as_index=False).agg({"Total Production": "sum"})
-
-    # Kategorik verileri sayısallaştırma
-    for column in group_columns:
-        grouped_df[f"{column}_num"] = grouped_df[column].astype("category").cat.codes
+    sources += [node_dict[locat] for locat in totalproductions["Location"]]
+    target += [node_dict[countr] for countr in totalproductions["Country"]]
+    values += totalproductions["Production"].tolist()
 
     
-    grouped_df["hovertext"] = grouped_df.apply(lambda row: ",".join([f"{col} :{row[col]}" for col in group_columns])+ f"Total Production : {row["Total Production"]}",axis = 1)
+    country_colors = px.colors.qualitative.Safe[:len(uniquecountry)]
+    location_colors = px.colors.qualitative.Pastel[:len(uniquelocations)]
+    detail_colors = px.colors.qualitative.Set1[:len(uniquedetails)]
+    species_colors = px.colors.qualitative.Dark2[:len(uniquespecies)]
+    node_colors = country_colors + location_colors + detail_colors + species_colors
 
-    dimensions = [
-        dict(range=[grouped_df[f"{col}_num"].min(), grouped_df[f"{col}_num"].max()],
-             label=f"{col}_num", values=grouped_df[f"{col}_num"])
-        for col in group_columns
-    ]
+    
+    link_opacity = [0.4 + (v / max(values)) * 0.6 for v in values] 
 
-    dimensions.append(
-        dict(range=[grouped_df["Total Production"].min(), grouped_df["Total Production"].max()],
-             label="Total Production", values=grouped_df["Total Production"])
-    )
-
-    # Paralel koordinat grafiği oluşturma
+   
     fig = go.Figure(
-        data=go.Parcoords(
-            line=dict(
-                color=grouped_df["Species_num"],
-                colorscale="viridis",
-                showscale=True,
+        go.Sankey(
+            node=dict(
+                pad=20,  
+                thickness=15,  
+                label=all_nodes,
+                color=node_colors
             ),
-            dimensions=dimensions
+            link=dict(
+                source=sources,
+                target=target,
+                value=values,
+                color=[f"rgba(31, 119, 180, {op})" for op in link_opacity] 
+            )
         )
     )
 
-
-    # Kullanıcıya seçilen argümanları gösterme
-    st.subheader("Selected Dimensions")
-    for col in group_columns:
-        st.dataframe(grouped_df[[col, f"{col}_num"]].drop_duplicates(subset=[col]))
-
-    # Grafik düzenlemeleri
+    
     fig.update_layout(
-        font=dict(size=14),
-        margin=dict(l=50, r=50, t=50, b=50),
+        title="Species-Method-Location-Country Total Productions Using Sankey Chart",
+        title_font=dict(size=20, family="Arial", color="black"), 
+        template="plotly_white",  
+        font=dict(size=14, family="Arial")  
     )
     return fig
-    
-    

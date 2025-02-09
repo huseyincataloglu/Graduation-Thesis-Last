@@ -55,17 +55,6 @@ with cl1:
         unsafe_allow_html=True
     )
 
-with cl2:
-    st.markdown("""
-      Brieflly explain production methods:         
-    - **Capture production** → *Capture*: Refers to fish caught directly from natural water bodies.
-    - **Aquaculture production (marine)** → *Marine Aq*: Represents fish farming in seawater.
-    - **Aquaculture production (freshwater)** → *Freshwater Aq*: Denotes fish farming in freshwater environments.
-    - **Aquaculture production (brackishwater)** → *Brackish Aq*: Refers to fish farming in brackish water (a mix of freshwater and seawater).
-
-    The `dataframe["Detail"]` column is updated using this mapping to provide concise and consistent labels for production types.
-    """,unsafe_allow_html=True)
-
 
 
 st.divider()
@@ -74,164 +63,72 @@ st.write("--------------------")
 choose = st.selectbox("Choose graph",options = ["Poduction Distributions In Single Year","Annualy Total Prod Box","Total Participation Frequency","Total Participation and Total Porduction Corelation"])
 
 if choose == "Annualy Total Prod Box":
-    if len(locations) == 0:
-        if len(methods) == 0:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_proddist_boxplotspecies(df,species,years))
-            else:
-               st.plotly_chart(speciesviz.plot_proddist_boxplotspecies(df,species,years,countries=countries))
-        else:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_proddist_boxplotspecies(df,species,years,methods=methods))
-            else:
-               st.plotly_chart(speciesviz.plot_proddist_boxplotspecies(df,species,years,countries=countries,methods=methods))
-    else:
-        if len(methods) == 0:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_proddist_boxplotspecies(df,species,years,locations=locations))
-            else:
-               st.plotly_chart(speciesviz.plot_proddist_boxplotspecies(df,species,years,countries=countries,locations=locations))
-        else:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_proddist_boxplotspecies(df,species,years,methods=methods,locations=locations))
-            else:
-               st.plotly_chart(speciesviz.plot_proddist_boxplotspecies(df,species,years,countries=countries,methods = methods,locations=locations))
+    st.plotly_chart(speciesviz.plot_histogram_yearlytotal(df, species, years),use_container_width=True)
 
 elif choose == "Poduction Distributions In Single Year":
     years1 = st.multiselect("Selecy separate years related to sidebar years:",[str(year) for year in range(years[0],years[1]+1)])
-    if len(locations) == 0:
-        if len(methods) == 0:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_parallel_corgrapyearly(df,species,years1))
-            else:
-                st.plotly_chart(speciesviz.plot_parallel_corgrapyearly(df,species,years1,countries=countries))
-        else:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_parallel_corgrapyearly(df,species,years1,methods=methods))
-            else:
-                st.plotly_chart(speciesviz.plot_parallel_corgrapyearly(df,species,years1,countries=countries,methods=methods))
-    else:
-        if len(methods) == 0:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_parallel_corgrapyearly(df,species,years1,locations=locations))
-            else:
-                st.plotly_chart(speciesviz.plot_parallel_corgrapyearly(df,species,years1,countries=countries,locations=locations))
-        else:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_parallel_corgrapyearly(df,species,years1,locations=locations,methods=methods))
-            else:
-                st.plotly_chart(speciesviz.plot_parallel_corgrapyearly(df,species,years1,countries=countries,locations=locations,methods = methods))
+    st.plotly_chart(speciesviz.plot_proddistspecies_yearly(df, species, years1),use_container_width=True)
 
-elif choose == "Total Participation Frequency":
-    if len(locations) == 0:
-        if len(methods) == 0:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_participation_by_species(df,species,years))
-            else:
-                st.plotly_chart(speciesviz.plot_participation_by_species(df,species,years,countries=countries))
-        else:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_participation_by_species(df,species,years,methods=methods))
-            else:
-                st.plotly_chart(speciesviz.plot_participation_by_species(df,species,years,countries=countries,methods=methods))
-    else:
-        if len(methods) == 0:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_participation_by_species(df,species,years,locations=locations))
-            else:
-                st.plotly_chart(speciesviz.plot_participation_by_species(df,species,years,countries=countries,locations=locations,methods = methods))
-        else:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_participation_by_species(df,species,years,methods=methods,locations=locations))
-            else:
-                st.plotly_chart(speciesviz.plot_participation_by_species(df,species,years,countries=countries,methods = methods,locations=locations))
+
 elif choose == "Total Participation and Total Porduction Corelation":
-    if len(locations) == 0:
-        if len(methods) == 0:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_partvsprod_by_species(df,species,years))
-            else:
-                st.plotly_chart(speciesviz.plot_partvsprod_by_species(df,species,years,countries=countries))
+    st.plotly_chart(speciesviz.plot_partvsprod_by_species(df,species,years),use_container_width=True)
+    st.plotly_chart(speciesviz.plot_speciesmethpd_paralelcat(df,species,years),use_container_width=True)
+
+
+st.divider()
+st.markdown("<h1 style='text-align: center; color: red;'>Time Series </h1>",unsafe_allow_html=True)
+st.write("---------------")
+if len(locations) == 0:
+    if len(methods) == 0:
+        if len(countries) == 0:
+            st.plotly_chart(speciesviz.plot_species_overyears(df,species,years),use_container_width=True)
         else:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_partvsprod_by_species(df,species,years,methods=methods))
-            else:
-                st.plotly_chart(speciesviz.plot_partvsprod_by_species(df,species,years,countries=countries,methods=methods))
+            st.plotly_chart(speciesviz.plot_speciesountries_overyears(df, species, years,countries),use_container_width=True)
     else:
-        if len(methods) == 0:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_partvsprod_by_species(df,species,years,locations=locations))
-            else:
-                st.plotly_chart(speciesviz.plot_partvsprod_by_species(df,species,years,countries=countries,locations=locations,methods = methods))
+        if len(countries) == 0:
+            st.plotly_chart(speciesviz.plot_speciesmethods_overyears(df, species, years,methods),use_container_width=True)
         else:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_partvsprod_by_species(df,species,years,methods=methods,locations=locations))
-            else:
-                st.plotly_chart(speciesviz.plot_partvsprod_by_species(df,species,years,countries=countries,methods = methods,locations=locations))
-            
-
-
-st.write("----------------")
-if len(locations) == 0:
-        if len(methods) == 0:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_parallel_corgrap(df,species,years))
-            else:
-                st.plotly_chart(speciesviz.plot_parallel_corgrap(df,species,years,countries=countries))
-        else:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_parallel_corgrap(df,species,years,methods=methods))
-            else:
-                st.plotly_chart(speciesviz.plot_parallel_corgrap(df,species,years,countries=countries,methods=methods))
+            st.plotly_chart(speciesviz.plot_speciesmethod_countoveryears(df, species, years,methods,countries),use_container_width=True)
 else:
-        if len(methods) == 0:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_parallel_corgrap(df,species,years,locations=locations))
-            else:
-                st.plotly_chart(speciesviz.plot_parallel_corgrap(df,species,years,countries=countries,locations=locations,methods = methods))
+    if len(methods) == 0:
+        if len(countries) == 0:
+            st.plotly_chart(speciesviz.plot_specieslocats_overyears(df, species, years,locations),use_container_width=True)
         else:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_parallel_corgrap(df,species,years,methods=methods,locations=locations))
-            else:
-                st.plotly_chart(speciesviz.plot_parallel_corgrap(df,species,years,countries=countries,methods = methods,locations=locations))
+            st.plotly_chart(speciesviz.plot_specieslocats_countroveryears(df, species, years,locations,countries),use_container_width=True)
+    else:
+        if len(countries) == 0:
+            st.plotly_chart(speciesviz.plot_specieslocats_methodsoveryears(df, species, years,locations,methods),use_container_width=True)
+        else:
+            st.plotly_chart(speciesviz.plot_specieslocat_methcountroveryears(df, species, years,locations,methods,countries),use_container_width=True)
 
+
+
+
+st.divider()
+st.markdown("<h1 style='text-align: center; color: red;'>Total Productions</h1>",unsafe_allow_html=True)
 st.write("-------------")
 if len(locations) == 0:
-        if len(methods) == 0:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_species_overyears(df,species,years))
-            else:
-                st.plotly_chart(speciesviz.plot_species_overyears(df,species,years,countries=countries))
+    if len(methods) == 0:
+        if len(countries) == 0:
+            st.plotly_chart(speciesviz.plot_speciespolar(df, species, years),use_container_width=True)
         else:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_species_overyears(df,species,years,methods=methods))
-            else:
-                st.plotly_chart(speciesviz.plot_species_overyears(df,species,years,countries=countries,methods=methods))
-else:
-        if len(methods) == 0:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_species_overyears(df,species,years,locations=locations))
-            else:
-                st.plotly_chart(speciesviz.plot_species_overyears(df,species,years,countries=countries,locations=locations,methods = methods))
+            st.plotly_chart(speciesviz.plot_speciescountries_polar(df, species, years,countries),use_container_width=True)
+    else:
+        if len(countries) == 0:
+            st.plotly_chart(speciesviz. plot_speciesmethodspolar(df, species, years,methods),use_container_width=True)
         else:
-            if len(countries) == 0:
-                st.plotly_chart(speciesviz.plot_species_overyears(df,species,years,methods=methods,locations=locations))
-            else:
-                st.plotly_chart(speciesviz.plot_species_overyears(df,species,years,countries=countries,methods = methods,locations=locations))
-
-st.write("-------------")
-if len(locations) == 0:
-    st.plotly_chart(speciesviz.plot_speciesprdouction_by_detail(df,species,years))
-else:
-    st.plotly_chart(speciesviz.plot_speciesprdouction_by_detail(df,species,years,locations))    
-
-
-st.write("-------------")
-
-if len(countries) == 0:
-    st.plotly_chart(speciesviz.plot_speciescountry_parallel(df, species, years))
+            st.plotly_chart(speciesviz. plot_speciescountr_methodpolar(df, species, years,methods,countries),use_container_width=True)
 else:    
-    st.plotly_chart(speciesviz.plot_speciescountry_parallel(df, species, years, countries))
+    if len(methods) == 0:
+        if len(countries) == 0:
+            st.plotly_chart(speciesviz.plot_specieslocat_polar(df, species, years,locations),use_container_width=True)
+        else:
+            st.plotly_chart(speciesviz.plot_speciescountr_locatpolar(df, species, years,locations,countries),use_container_width=True)
+    else:
+        if len(countries) == 0:
+            st.plotly_chart(speciesviz.plot_speciesmethods_locatpolar(df, species, years,locations,methods),use_container_width=True)
+        else:
+            st.plotly_chart(speciesviz.plot_specylocatmethods_countr_sankey(df,species,years,locations,methods,countries),use_container_width=True)
 
 
 

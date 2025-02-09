@@ -1,5 +1,6 @@
 import streamlit as st
 import plotly.express as px
+import plotly.graph_objects as go
 import pandas as pd
 from modules import utilities as ut
 from modules import locationvisualizations as locviz
@@ -52,7 +53,7 @@ locations = st.sidebar.multiselect("Choose locations : ",ut.get_uniquefeature(df
 st.sidebar.divider()
 years = st.sidebar.slider("Choose the range to filter",min_value=1950,max_value=2018,step=1,value=(1950,2018))
 st.sidebar.divider()
-countries = st.sidebar.multiselect("Filter Couuntries:",ut.get_commoncountr_forlocs(df,locations,years))
+countries = st.sidebar.multiselect("Filter Countries:",ut.get_commoncountr_forlocs(df,locations,years))
 st.sidebar.divider()
 if len(countries) == 0: 
     methods = st.sidebar.multiselect("Filter Production Methods",ut.get_methodsfor_locandcount(df,locations,years))
@@ -77,176 +78,78 @@ st.sidebar.divider()
 st.divider()
 st.header("Frequencies and Distributions")
 st.write("--------------------")
-choose = st.selectbox("Choose graph",options = ["Poduction Distributions In Single Year","Annualy Total Prod Heatmap","Total Participation Frequency","Total Participation and Total Porduction Corelation"])
+choose = st.selectbox("Choose graph",options = ["Poduction Distributions In Single Year","Annualy Total Prod Heatmap","Total Participation and Total Production Corelation"])
 
 if choose == "Annualy Total Prod Heatmap":
-    if len(countries) == 0:
-        if len(methods) == 0:
-            if len(species) == 0:
-                st.plotly_chart(locviz.plot_proddist_boxplotlocations(df,locations,years))
-            else:
-               st.plotly_chart(locviz.plot_proddist_boxplotlocations(df,locations,years,species=species))
-        else:
-            if len(species) == 0:
-                st.plotly_chart(locviz.plot_proddist_boxplotlocations(df,locations,years,methods=methods))
-            else:
-               st.plotly_chart(locviz.plot_proddist_boxplotlocations(df,locations,years,species=species,methods=methods))
-    else:
-        if len(methods) == 0:
-            if len(species) == 0:
-                st.plotly_chart(locviz.plot_proddist_boxplotlocations(df,locations,years,countries=countries))
-            else:
-               st.plotly_chart(locviz.plot_proddist_boxplotlocations(df,locations,years,countries=countries,species=species))
-        else:
-            if len(species) == 0:
-                st.plotly_chart(locviz.plot_proddist_boxplotlocations(df,locations,years,methods=methods,countries=countries))
-            else:
-               st.plotly_chart(locviz.plot_proddist_boxplotlocations(df,locations,years,countries=countries,methods = methods,species=species))
+    st.plotly_chart(locviz.plot_proddist_boxplotlocations(df,locations,years))
 
 
-elif choose == "Total Participation Frequency":
-    if len(countries) == 0:
-        if len(methods) == 0:
-            if len(species) == 0:
-                st.plotly_chart(locviz.plot_participation_by_locations(df,locations,years))
-            else:
-               st.plotly_chart(locviz.plot_participation_by_locations(df,locations,years,species=species))
-        else:
-            if len(species) == 0:
-                st.plotly_chart(locviz.plot_participation_by_locations(df,locations,years,methods=methods))
-            else:
-               st.plotly_chart(locviz.plot_participation_by_locations(df,locations,years,species=species,methods=methods))
-    else:
-        if len(methods) == 0:
-            if len(species) == 0:
-                st.plotly_chart(locviz.plot_participation_by_locations(df,locations,years,countries=countries))
-            else:
-               st.plotly_chart(locviz.plot_participation_by_locations(df,locations,years,countries=countries,species=species))
-        else:
-            if len(species) == 0:
-                st.plotly_chart(locviz.plot_participation_by_locations(df,locations,years,methods=methods,countries=countries))
-            else:
-               st.plotly_chart(locviz.plot_participation_by_locations(df,locations,years,countries=countries,methods = methods,species=species))
-
-elif choose == "Total Participation and Total Porduction Corelation":
-    if len(countries) == 0:
-        if len(methods) == 0:
-            if len(species) == 0:
-                st.plotly_chart(locviz.plot_partvsprod_by_locations(df,locations,years))
-            else:
-               st.plotly_chart(locviz.plot_partvsprod_by_locations(df,locations,years,species=species))
-        else:
-            if len(species) == 0:
-                st.plotly_chart(locviz.plot_partvsprod_by_locations(df,locations,years,methods=methods))
-            else:
-               st.plotly_chart(locviz.plot_partvsprod_by_locations(df,locations,years,species=species,methods=methods))
-    else:
-        if len(methods) == 0:
-            if len(species) == 0:
-                st.plotly_chart(locviz.plot_partvsprod_by_locations(df,locations,years,countries=countries))
-            else:
-               st.plotly_chart(locviz.plot_partvsprod_by_locations(df,locations,years,countries=countries,species=species))
-        else:
-            if len(species) == 0:
-                st.plotly_chart(locviz.plot_partvsprod_by_locations(df,locations,years,methods=methods,countries=countries))
-            else:
-               st.plotly_chart(locviz.plot_partvsprod_by_locations(df,locations,years,countries=countries,methods = methods,species=species))
+elif choose == "Total Participation and Total Production Corelation":
+    st.plotly_chart(locviz.plot_partvsprod_by_locations(df,locations,years))
+    st.plotly_chart(locviz.plot_locationmethpd_paralelcat(df,locations,years))
 
 
 elif choose == "Poduction Distributions In Single Year":
     years3 = st.multiselect("Choose Years",options=[str(year) for year in range(years[0],years[1]+1)])
-    if len(countries) == 0:
-        if len(methods) == 0:
-            if len(species) == 0:
-                st.plotly_chart(locviz.plot_locationn_grapyearly(df,locations,years3))
-            else:
-               st.plotly_chart(locviz.plot_locationn_grapyearly(df,locations,years3,species=species))
-        else:
-            if len(species) == 0:
-                st.plotly_chart(locviz.plot_locationn_grapyearly(df,locations,years3,methods=methods))
-            else:
-               st.plotly_chart(locviz.plot_locationn_grapyearly(df,locations,years3,species=species,methods=methods))
-    else:
-        if len(methods) == 0:
-            if len(species) == 0:
-                st.plotly_chart(locviz.plot_locationn_grapyearly(df,locations,years3,countries=countries))
-            else:
-               st.plotly_chart(locviz.plot_locationn_grapyearly(df,locations,years3,countries=countries,species=species))
-        else:
-            if len(species) == 0:
-                st.plotly_chart(locviz.plot_locationn_grapyearly(df,locations,years3,methods=methods,countries=countries))
-            else:
-               st.plotly_chart(locviz.plot_locationn_grapyearly(df,locations,years3,countries=countries,methods = methods,species=species))
+    st.plotly_chart(locviz.plot_locationn_grapyearly(df,locations,years3))
 
-
-st.write("----------------")
-
-cc1,cc2 = st.columns(2)
-with cc1:
+st.divider()
+st.markdown("<h1 style='text-align: center; color: red;'>Time Series </h1>",unsafe_allow_html=True)
+st.write("---------------------------------------------------")
+if len(locations) == 0:
+    st.warning("Please select some locations")
+else:    
     if len(countries) == 0:
             if len(methods) == 0:
                 if len(species) == 0:
                     st.plotly_chart(locviz.plot_distline_locat(df,locations,years))
                 else:
-                    st.plotly_chart(locviz.plot_distline_locat(df,locations,years,species=species))
+                    st.plotly_chart(locviz.plot_region_species_scatter_line(df, locations, years,species))
             else:
                 if len(species) == 0:
-                    st.plotly_chart(locviz.plot_distline_locat(df,locations,years,methods=methods))
+                    st.plotly_chart(locviz.plot_region_methods_scatter_line(df, locations, years, methods))
                 else:
-                    st.plotly_chart(locviz.plot_distline_locat(df,locations,years,species=species,methods=methods))
+                    st.plotly_chart(locviz. plot_region_methodsspecies_scatter_line(df, locations, years, methods,species))
     else:
-            if len(methods) == 0:
-                if len(species) == 0:
-                    st.plotly_chart(locviz.plot_distline_locat(df,locations,years,countries=countries))
-                else:
-                    st.plotly_chart(locviz.plot_distline_locat(df,locations,years,countries=countries,species=species))
+        if len(methods) == 0:
+            if len(species) == 0:
+                st.plotly_chart(locviz.plot_locat_country_line(df, locations, years,countries))
             else:
-                if len(species) == 0:
-                    st.plotly_chart(locviz.plot_distline_locat(df,locations,years,methods=methods,countries=countries))
-                else:
-                    st.plotly_chart(locviz.plot_distline_locat(df,locations,years,countries=countries,methods = methods,species=species))
+                st.plotly_chart(locviz.plot_region_countriesspecies_scatter_line(df, locations, years, countries,species))
+        else:
+            if len(species) == 0:
+                st.plotly_chart(locviz.plot_region_countriesmethod_scatter_line(df, locations, years, countries,methods))
+            else:
+                st.plotly_chart(locviz.plot_region_countriesmethod_speciesscatter_line(df, locations, years, countries,methods,species))
                 
                 
-with cc2:
-    if len(methods) == 0:
-        if len(species) == 0:
-            st.plotly_chart(locviz.plot_groupedbarloc(df,locations,years),key = "prodloc")
-        else:
-            st.plotly_chart(locviz.plot_specygrouped_bar(df,locations,years,species))
-    else:
-        if len(species) == 0:
-            st.plotly_chart(locviz. plot_groupedbarlocandmethod(df,locations,years,methods))
-        else:
-            st.plotly_chart(locviz.plot_locmethod_specy(df,locations,years,methods,species)   ) 
-
-   
-
-cccc1,cccc2 = st.columns([2,1])
-
-with cccc1:
+st.divider()
+st.markdown("<h1 style='text-align: center; color: red;'>Total Productions</h1>",unsafe_allow_html=True)
+st.write("--------------")
+if len(locations) == 0:
+    st.warning("Please select some locations")
+else:
     if len(countries) == 0:
-            if len(methods) == 0:
-                if len(species) == 0:
-                    st.plotly_chart(locviz.plot_country_map(df,locations, years),key = "country_map")
-                else:
-                    st.plotly_chart(locviz.plot_country_map(df,locations,years,species=species))
+        if len(methods) == 0:
+            if len(species) == 0:
+                st.plotly_chart(locviz.plot_groupedbarloc(df,locations,years),key = "prodloc")
             else:
-                if len(species) == 0:
-                    st.plotly_chart(locviz.plot_country_map(df,locations,years,methods=methods))
-                else:
-                    st.plotly_chart(locviz.plot_country_map(df,locations,years,species=species,methods=methods))
+                st.plotly_chart(locviz.plot_specygrouped_bar(df,locations,years,species))
+        else:
+            if len(species) == 0:
+                st.plotly_chart(locviz. plot_groupedbarlocandmethod(df,locations,years,methods))
+            else:
+                st.plotly_chart(locviz.plot_locmethod_specy(df,locations,years,methods,species))
     else:
-            if len(methods) == 0:
-                if len(species) == 0:
-                    st.plotly_chart(locviz.plot_country_map(df,locations,years,countries=countries))
-                else:
-                    st.plotly_chart(locviz.plot_country_map(df,locations,years,countries=countries,species=species))
+        if len(methods) == 0:
+            if len(species) == 0:
+                st.plotly_chart(locviz.plot_countrygrouped_bar(df,locations,years,countries))
             else:
-                if len(species) == 0:
-                    st.plotly_chart(locviz.plot_country_map(df,locations,years,methods=methods,countries=countries))
-                else:
-                    st.plotly_chart(locviz.plot_country_map(df,locations,years,countries=countries,methods = methods,species=species))
+                st.plotly_chart(locviz.plot_loccountry_specy(df,locations,years,countries,species))
+        else:
+            if len(species) == 0:
+                st.plotly_chart(locviz. plot_loccountry_method(df,locations,years,countries,methods))
+            else:
+                st.plotly_chart(locviz.plot_locat_countriesmethod_specy_bar(df, locations, years, countries,methods,species))
 
-with cccc2:
-    st.plotly_chart(locviz.plot_locandmethod(df,locations,years),key = "locandmethod")
-    
+

@@ -6,7 +6,7 @@ from modules import speciesvizualition as speciesviz
 from app import df
 
 #Sidebar configurations --------------
-st.sidebar.title("All Filters")
+st.sidebar.header("All Filters")
 st.sidebar.divider()
 species = st.sidebar.multiselect("Choose species : ",ut.get_uniquefeature(df,"Species"))
 st.sidebar.divider()
@@ -58,9 +58,11 @@ with cl1:
 
 
 st.divider()
+
 st.header("Frequencies and Distributions")
+
 st.write("--------------------")
-choose = st.selectbox("Choose graph",options = ["Poduction Distributions In Single Year","Annualy Total Prod Box","Total Participation Frequency","Total Participation and Total Porduction Corelation"])
+choose = st.selectbox("Choose graph",options = ["Poduction Distributions In Single Year","Annualy Total Prod Box","Total Participation and Total Porduction Corelation"])
 
 if choose == "Annualy Total Prod Box":
     st.plotly_chart(speciesviz.plot_histogram_yearlytotal(df, species, years),use_container_width=True)

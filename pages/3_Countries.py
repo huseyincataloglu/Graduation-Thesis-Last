@@ -65,9 +65,8 @@ with c2:
 
 # Sidebar extensions -----------------------------
 
-st.sidebar.title("All Filters")
+st.sidebar.header("All Filters")
 st.sidebar.divider()
-
 countries = st.sidebar.multiselect("Select Countries",ut.get_uniquefeature(df,"Country"))
 st.sidebar.divider()
 years = st.sidebar.slider("Choose the range to filter",min_value=1950,max_value=2018,step=1,value=(1950,2018))
@@ -97,31 +96,33 @@ st.divider()
 
 st.header("Frequencies and Distributions")
 st.write("--------------------")
-choose = st.selectbox("Choose graph",options = ["Poduction Distributions In Single Year","Annualy Total Prod Box","Total Participation and Total Porduction Corelation"])
+choose = st.selectbox("Choose graph",options = ["Poduction Distributions In Single Year",
+                                    "Annualy Total Prod Box",
+                                    "Total Participation and Total Porduction Corelation"])
 
 if choose == "Annualy Total Prod Box":
     if len(locations) == 0:
         if len(methods) == 0:
-            st.plotly_chart(cviz.plot_proddist_boxplot(df,countries,years))
+            st.plotly_chart(cviz.plot_proddist_boxplot(df,countries,years),use_container_width=True)
         else:
-            st.plotly_chart(cviz.plot_proddist_boxplot(df,countries,years,methods=methods))
+            st.plotly_chart(cviz.plot_proddist_boxplot(df,countries,years,methods=methods),use_container_width=True)
     else:
         if len(methods) == 0:
-            st.plotly_chart(cviz.plot_proddist_boxplot(df,countries,years,locations=locations))
+            st.plotly_chart(cviz.plot_proddist_boxplot(df,countries,years,locations=locations),use_container_width=True)
         else:
-            st.plotly_chart(cviz.plot_proddist_boxplot(df,countries,years,methods=methods,locations=locations))
+            st.plotly_chart(cviz.plot_proddist_boxplot(df,countries,years,methods=methods,locations=locations),use_container_width=True)
 elif choose == "Poduction Distributions In Single Year":
     years1 = st.multiselect("Select Year:",options=[str(year) for year in range(years[0],years[1]+1)])
     if len(locations) == 0:
         if len(methods) == 0:
-            st.plotly_chart(cviz. plot_proddist_yearly(df,countries,years1))
+            st.plotly_chart(cviz. plot_proddist_yearly(df,countries,years1),use_container_width=True)
         else:
-            st.plotly_chart(cviz. plot_proddist_yearly(df,countries,years1,methods=methods))
+            st.plotly_chart(cviz. plot_proddist_yearly(df,countries,years1,methods=methods),use_container_width=True)
     else:
         if len(methods) == 0:
-            st.plotly_chart(cviz. plot_proddist_yearly(df,countries,years1,locations=locations))
+            st.plotly_chart(cviz. plot_proddist_yearly(df,countries,years1,locations=locations),use_container_width=True)
         else:
-            st.plotly_chart(cviz. plot_proddist_yearly(df,countries,years1,methods=methods,locations=locations))                
+            st.plotly_chart(cviz. plot_proddist_yearly(df,countries,years1,methods=methods,locations=locations),use_container_width=True)                
 
 elif choose == "Total Participation and Total Porduction Corelation":
     st.plotly_chart(cviz. plot_partvsprod_by_country(df,countries,years))

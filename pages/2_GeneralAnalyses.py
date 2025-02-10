@@ -9,7 +9,7 @@ from app import df
 
 
 
-choose = st.sidebar.selectbox("Choose type of analyses:",["Fishery Area","Countries","Species"])
+choose = st.sidebar.selectbox("Choose type of analyses:",["Locations","Countries","Species"])
 st.sidebar.write("----------")
 years = st.sidebar.slider("Filter the years",min_value=1950,max_value=2018,value=(1950,2018),step=1)
 
@@ -31,7 +31,7 @@ Select any option and dive into detailed visualizations to gain insights into th
 st.divider()
 
 
-if choose ==  "Fishery Area":
+if choose ==  "Locations":
     locations = ["All Areas"] + list(util.get_uniquefeature(df,"Location"))
     location = st.selectbox("Choose Area :",locations)
 
@@ -90,6 +90,7 @@ if choose ==  "Fishery Area":
         st.write("-------------------")
         st.markdown("<h1 style='text-align: center; color: red;'>Country Section</h1>",unsafe_allow_html=True)
         lc1,lc2= st.columns([1,1],vertical_alignment="top")
+        
         with lc1:
             st.write("---------------")
             st.plotly_chart(viz.plot_locationproduction_increase(df,years,location))
@@ -189,7 +190,7 @@ elif choose == "Species":
     with c2:
         st.markdown("""<h2 style = 'text-align : center;'> Annualy Total Production Distributions</h3> """,unsafe_allow_html=True)
         st.write("-------")
-        st.plotly_chart(viz.plot_specybox_allyears(df,specy,years))
+        st.plotly_chart(viz.plot_specybox_allyears(df,specy,years),use_container_width=True)
 
     st.write("-------")
     st.markdown("<h1 style='text-align: center; color: red;'>Location Section</h1>",unsafe_allow_html=True)

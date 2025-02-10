@@ -37,7 +37,12 @@ def plot_funnel_hiearchi(df,years):
     data_funnel = pd.DataFrame({"Stage" : [f"Method","Location","Country","Species"], "Category": [detail["Detail"].values[0], locat["Location"].values[0], countr["Country"].values[0], species["Species"].values[0]],  # Her aşamanın en yüksek değeri
         "Production": [detail["Production"].values[0], locat["Production"].values[0], countr["Production"].values[0], species["Production"].values[0]]})
     data_funnel.sort_values("Production",ascending=True,inplace=True)
-    fig = px.funnel(data_funnel,x = "Production",y = "Category",color = "Category", title="Funnel Chart for Highest Productions Hierarchi")
+
+    fig = px.funnel(data_funnel,
+                x = "Production",
+                y = "Category",
+                color = "Category",
+                title="Funnel Chart for Highest Productions Hierarchi")
 
     return fig
 
@@ -230,16 +235,17 @@ def plot_locations_by_prodution(df,years):
     başlangıç = (st.session_state.methodsayfa - 1) * sayfa_boyutu
     bitiş = başlangıç + sayfa_boyutu
     current_lcoations = totalproductionby_locations.iloc[başlangıç:bitiş]
-    current_lcoations = current_lcoations.sort_values("Production",ascending = False)
+    current_lcoations = current_lcoations.sort_values("Production",ascending = True)
 
     
-    fig = px.funnel_area(
+    fig = px.bar(
         current_lcoations,
-        names="Location",
-        values="Production",
-        color="Location",
-        color_discrete_sequence=px.colors.sequential.RdBu,
-        title="Fishery Areas with Total Productions Funnel Area Chart"
+        x = "Production",
+        y = "Location",
+        color="Production",
+        color_continuous_scale=px.colors.sequential.RdBu,
+        title="Fishery Areas with Total Productions H Bar Chart",
+        orientation="h"
     )
     fig.update_layout(
         width = 700,

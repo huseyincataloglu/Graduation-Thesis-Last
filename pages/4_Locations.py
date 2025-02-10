@@ -47,7 +47,7 @@ with column2:
    
 
 
-st.sidebar.title("All Filters")
+st.sidebar.header("All Filters")
 st.sidebar.divider()
 locations = st.sidebar.multiselect("Choose locations : ",ut.get_uniquefeature(df,"Location"))
 st.sidebar.divider()
@@ -132,24 +132,24 @@ else:
     if len(countries) == 0:
         if len(methods) == 0:
             if len(species) == 0:
-                st.plotly_chart(locviz.plot_groupedbarloc(df,locations,years),key = "prodloc")
+                st.plotly_chart(locviz.plot_groupedbarloc(df,locations,years),key = "prodloc",use_container_width=True)
             else:
-                st.plotly_chart(locviz.plot_specygrouped_bar(df,locations,years,species))
+                st.plotly_chart(locviz.plot_specygrouped_bar(df,locations,years,species),use_container_width=True)
         else:
             if len(species) == 0:
-                st.plotly_chart(locviz. plot_groupedbarlocandmethod(df,locations,years,methods))
+                st.plotly_chart(locviz. plot_groupedbarlocandmethod(df,locations,years,methods),use_container_width=True)
             else:
-                st.plotly_chart(locviz.plot_locmethod_specy(df,locations,years,methods,species))
+                st.plotly_chart(locviz.plot_locmethod_specy(df,locations,years,methods,species),use_container_width=True)
     else:
         if len(methods) == 0:
             if len(species) == 0:
                 st.plotly_chart(locviz.plot_countrygrouped_bar(df,locations,years,countries))
             else:
-                st.plotly_chart(locviz.plot_loccountry_specy(df,locations,years,countries,species))
+                st.plotly_chart(locviz.plot_loccountry_specy(df,locations,years,countries,species),use_container_width=True)
         else:
             if len(species) == 0:
-                st.plotly_chart(locviz. plot_loccountry_method(df,locations,years,countries,methods))
+                st.plotly_chart(locviz. plot_loccountry_method(df,locations,years,countries,methods),use_container_width=True)
             else:
-                st.plotly_chart(locviz.plot_locat_countriesmethod_specy_bar(df, locations, years, countries,methods,species))
+                st.plotly_chart(locviz.plot_locat_countriesmethod_specy_bar(df, locations, years, countries,methods,species),use_container_width=True)
 
 

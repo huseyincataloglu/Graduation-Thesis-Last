@@ -34,16 +34,16 @@ def plot_locationproduction_increase(df,years,location):
     fig.update_layout(xaxis_title="Years",yaxis_title="Production")
     fig.update_layout(
         width = 600,
-        font=dict(size=16),  # Yazı boyutu
+        font=dict(size=16),  
         xaxis=dict(
             gridwidth=1,
-            title_font=dict(size=18, color="red"),  # X eksen başlık yazı rengi kırmızı
-            tickfont=dict(size=14, color="black")   # X eksen işaret yazı rengi siyah
+            title_font=dict(size=18, color="red"),  
+            tickfont=dict(size=14, color="black")   
         ),
         yaxis=dict(
             gridwidth=1,
-            title_font=dict(size=18, color="red"),  # Y eksen başlık yazı rengi kırmızı
-            tickfont=dict(size=14, color="black")   # Y eksen işaret yazı rengi siyah
+            title_font=dict(size=18, color="red"),  
+            tickfont=dict(size=14, color="black")   
         )
     )
     return fig
@@ -55,10 +55,18 @@ def locatcountry_meth(df, years, locations):
 
     df = df[df["Location"] == locations]
 
-    # Üretimi toplamak
+    
     grouped = df.groupby(["Country", "Detail"])[years].sum().sum(axis=1).reset_index(name="Production").sort_values("Production", ascending=False).head(30)
 
-    fig = px.pie(grouped,names ="Country",values="Production",color = "Country",facet_col="Detail",facet_col_wrap=2,title=f"Countries's most used methods in {locations}",hole=0.4)
+    fig = px.pie(grouped,
+                names ="Country",
+                values="Production",
+                color = "Country",
+                facet_col="Detail",
+                facet_col_wrap=2,
+                title=f"Countries's most used methods in {locations}",
+                hole=0.4)
+    
     fig.update_layout(
         width = 700,
         height = 700,
@@ -99,33 +107,6 @@ def plot_top_count_byloc(df,years,location):
 
     top_countries = df.groupby('Country')[years].sum().sum(axis=1).reset_index(name='Production').sort_values('Production', ascending=False)
     
-    #sayfa_boyutu = 7
-    #toplam_sayfa = (len(top_countries.Country) - 1) // sayfa_boyutu + 1
-
-    #if "ülkesayfa" not in st.session_state:
-    #    st.session_state.ülkesayfa = 1
-
-    # Butonları grafiğin altına taşı
-    #col1, col2, col3 = st.columns([1, 1, 1])  # Her sütun aynı genişlikte
-    #with col1:
-    #    geri_al = st.button("⬅️ Geri",key = "Country")
-    #with col2:
-    #    sıfırla = st.button("🔄 Sıfırla",key = "Country Sıfırla")
-    #with col3:
-    #    ileri_al = st.button("➡️ İleri",key = "Country ileri")
-
-    #if geri_al and st.session_state.ülkesayfa > 1:
-    #    st.session_state.ülkesayfa -= 1 
-    #if sıfırla:
-    #    st.session_state.ülkesayfa = 1 
-    #if ileri_al and st.session_state.ülkesayfa < toplam_sayfa:
-    #        st.session_state.ülkesayfa += 1           
-
-    #başlangıç = (st.session_state.ülkesayfa - 1) * sayfa_boyutu
-    #bitiş = başlangıç + sayfa_boyutu
-    #current_countries = top_countries.iloc[başlangıç:bitiş]
-
-    # Grafik oluşturma
     fig = px.choropleth(
         top_countries,
         locations="Country",
@@ -135,28 +116,14 @@ def plot_top_count_byloc(df,years,location):
         title=title
     )
     fig.update_layout(
-    width=1000,  # Adjust the width
-    height=600,  # Adjust the height if needed
+    width=1000,  
     geo=dict(
-        projection_type='natural earth',  # You can specify the type of projection
-        showcoastlines=True,  # Optional, to show coastlines
-        coastlinecolor="Black",  # Optional, to set the coastline color
+        projection_type='natural earth',  
+        showcoastlines=True,  
+        coastlinecolor="Black",  
     )
     )
-    #fig.update_yaxes(categoryorder="total ascending")
-    #fig.update_layout(
-        #font=dict(size=16),
-        #xaxis=dict(
-        #    gridwidth=1,
-        #    title_font=dict(size=18, color="red"),
-        #    tickfont=dict(size=14, color="black"),
-        #),
-        #yaxis=dict(
-        #    gridwidth=1,
-        #    title_font=dict(size=18, color="red"),
-        #    tickfont=dict(size=14, color="black"),
-        #),
-    #)
+    
     return fig
 
 def plot_locaspecy_intime(df,years,location):
@@ -404,16 +371,18 @@ def plot_countryspecy_methodprod(df, country, years):
     df = df[df["Country"] == country]
 
     grouped = df.groupby(["Species", "Detail"])[years].sum().sum(axis=1).reset_index(name="Production").sort_values("Production",ascending = False).head(40)
+    grouped = grouped.sort_values("Production",ascending = True)
 
 
     fig = px.bar(
         grouped, 
-        x="Species", 
-        y="Production", 
+        x="Production", 
+        y="Species", 
         color="Detail", 
         title=f"Top Species and Their Production Methods in {country} ({start} - {end})",
         labels={"Production": "Total Production", "Species": "Species", "Detail": "Method"},
-        barmode="stack"
+        barmode="stack",
+        orientation="h"
     )
 
     fig.update_layout(
@@ -438,7 +407,11 @@ def plot_countryspecy_locatprod(df,country,years):
     df = df[df["Country"] == country]
     group = df.groupby(["Country","Location","Species","Detail"])[years].sum().sum(axis = 1).reset_index(name = "Production").sort_values("Production",ascending =False).head(40)
     group = group[group.Production > 0]
-    fig = px.sunburst(group,values="Production",path=["Location","Detail","Country","Species"],color="Production",title=title,color_continuous_scale="RdBu")
+    fig = px.sunburst(group,
+            values="Production",
+            path=["Location","Detail","Country","Species"],
+            color="Production",
+            title=title,color_continuous_scale="RdBu")
     fig.update_layout(
         width = 800,
         height = 800
@@ -572,20 +545,20 @@ def plot_countryprod_methods(df, country,years):
     start,end = years
     years = [str(year) for year in range(start,end+1,+1)]
     if len(years) == 1:
-        title=f"Production Methods Funnel Area Chart for {country} in {start}"
+        title=f"Production Methods H Bar Chart for {country} in {start}"
     else:
-        title=f"Production Methods Funnel Area Chart for {country} in {start} to {end}"
+        title=f"Production Methods  H Bar Chart for {country} in {start} to {end}"
     df = df[df["Country"] == country]
     grouped_by_method = (
         df.groupby(["Detail", "Country"])[years]
         .sum()
         .sum(axis=1)
         .reset_index(name="Production")
-        .sort_values("Production", ascending=False)
+        .sort_values("Production", ascending=True)
     )
 
-    fig = px.funnel_area(
-        grouped_by_method,names="Detail",values="Production",color="Detail",color_discrete_sequence=px.colors.qualitative.Pastel1,title=title
+    fig = px.bar(
+        grouped_by_method,x="Production",y="Detail",color="Production",color_continuous_scale=px.colors.sequential.Plasma,title=title,orientation="h"
     )
     fig.update_layout(
         width = 700,
@@ -616,28 +589,6 @@ def plot_countrybox_allyears(df,country,years):
     )
     return figure
 
-#def plot_rainbow_foryears(df,country,years):
- #   start,end = years
- #   years = [str(year) for year in range(start,end+1)]
- #   df = df[df["Country"] == country]
- #   df_melted = pd.melt(df,id_vars=["Country"],value_vars=years,value_name="Production",var_name="Years")
- #   fig = px.box(df_melted,x = "Years",y = "Production",color = "Years",title="Production Distributions Within Years")
- #   fig.update_layout(
- #       width = 800,
- #       height = 500,
- #       font=dict(size=16),  # Yazı boyutu
- #       xaxis=dict(
- #           title_font=dict(size=18, color="red"),  # X eksen başlık yazı rengi kırmızı
- #           tickfont=dict(size=14, color="black")   # X eksen işaret yazı rengi siyah
- #       ),
-#      yaxis=dict(
-#            title_font=dict(size=18, color="red"),  # Y eksen başlık yazı rengi kırmızı
-#            tickfont=dict(size=14, color="black")   # Y eksen işaret yazı rengi siyah
-#        )
-    #)
-    #return fig
-
-
 
 
 
@@ -650,10 +601,18 @@ def plot_specybox_allyears(df,specy,years):
     df = df[df["Species"] == specy]
     df = df.groupby("Species")[years].sum().reset_index()
     df_melted= pd.melt(df,id_vars=["Species"],value_vars=years,var_name="Years",value_name="Production")
-    figure = px.density_heatmap(df_melted,x = "Years",y = "Production",title=f"{specy}'s Distribution of Total Production Values from {start} to {end}",marginal_x="histogram",marginal_y="histogram",color_continuous_scale=px.colors.sequential.RdBu)
+
+    figure = px.density_heatmap(df_melted,
+                    x = "Years",
+                    y = "Production",
+                    title=f"{specy}'s Distribution of Total Production Values from {start} to {end}",
+                    marginal_x="histogram",
+                    marginal_y="histogram",
+                    color_continuous_scale=px.colors.sequential.RdBu)
+    
     figure.update_layout(
         width = 800,
-        height = 500
+        height = 600
     )
     return figure
 
@@ -719,23 +678,6 @@ def plot_species_region(df,specy,years):
     figure.update_layout(
         height =900
     )
-    #figure.update_traces(
-    #    text=grouped_by_location["Percentage"].map(lambda x: f"{x:.1f}%"),
-    #    textposition = "outside"
-    #)
-
-    #figure.update_layout(
-        #uniformtext_minsize=8, uniformtext_mode="hide",
-        #font=dict(size=16),  # Yazı boyutu
-        #xaxis=dict(
-        #   title_font=dict(size=18, color="red"),  # X eksen başlık yazı rengi kırmızı
-        #    tickfont=dict(size=14, color="black")   # X eksen işaret yazı rengi siyah
-        #),
-        #yaxis=dict(
-        #    title_font=dict(size=18, color="red"),  # Y eksen başlık yazı rengi kırmızı
-        #   tickfont=dict(size=14, color="black")   # Y eksen işaret yazı rengi siyah
-        #)
-    #)
     return figure
 
 
@@ -775,19 +717,6 @@ def plot_parallel_categories(df, specy,years):
         return fig
 
 
-""" def plot_top_locforspecy(df,specy,years):
-    start ,end = years
-    years = [str(year) for year in range(start,end+1)]
-    df = df[df["Species"] == specy]
-    top_countries = df.groupby('Location')[years].sum().sum(axis=1).reset_index(name='Production').sort_values('Production', ascending=False)
-    top_countries = top_countries[top_countries["Production"] > 0]
-    fig = px.bar(top_countries,x = "Production", y = "Location",color  = "Production",color_continuous_scale="RdBu",title=f"In Which locations {specy} is produced most",orientation="h")
-    fig.update_layout(
-        width = 700,
-        height = 600
-    )
-    fig.update_yaxes(categoryorder="total ascending")
-    return fig """
 
 def plot_top_count_species(df,specy,years):
     start ,end = years
@@ -797,33 +726,6 @@ def plot_top_count_species(df,specy,years):
 
     top_countries = df.groupby('Country')[years].sum().sum(axis=1).reset_index(name='Production').sort_values('Production', ascending=False)
     
-    #sayfa_boyutu = 7
-    #toplam_sayfa = (len(top_countries.Country) - 1) // sayfa_boyutu + 1
-
-    #if "ülkesayfa" not in st.session_state:
-    #    st.session_state.ülkesayfa = 1
-
-    # Butonları grafiğin altına taşı
-    #col1, col2, col3 = st.columns([1, 1, 1])  # Her sütun aynı genişlikte
-    #with col1:
-    #    geri_al = st.button("⬅️ Geri",key = "Country")
-    #with col2:
-    #    sıfırla = st.button("🔄 Sıfırla",key = "Country Sıfırla")
-    #with col3:
-    #    ileri_al = st.button("➡️ İleri",key = "Country ileri")
-
-    #if geri_al and st.session_state.ülkesayfa > 1:
-    #    st.session_state.ülkesayfa -= 1 
-    #if sıfırla:
-    #    st.session_state.ülkesayfa = 1 
-    #if ileri_al and st.session_state.ülkesayfa < toplam_sayfa:
-    #        st.session_state.ülkesayfa += 1           
-
-    #başlangıç = (st.session_state.ülkesayfa - 1) * sayfa_boyutu
-    #bitiş = başlangıç + sayfa_boyutu
-    #current_countries = top_countries.iloc[başlangıç:bitiş]
-
-    # Grafik oluşturma
     fig = px.choropleth(
         top_countries,
         locations="Country",
@@ -833,30 +735,17 @@ def plot_top_count_species(df,specy,years):
         title=title
     )
     fig.update_layout(
-        width=1000,  # Adjust the width
-        height=600,  # Adjust the height if needed
+        width=1000,  
+        height=600,  
         geo=dict(
-            projection_type='natural earth',  # You can specify the type of projection
-            showcoastlines=True,  # Optional, to show coastlines
-            coastlinecolor="Black",  # Optional, to set the coastline color
-            lataxis_range=[-60, 85],  # Enlem aralığı (dünya haritasını sınırlar)
-            lonaxis_range=[-180, 180],  # Boylam aralığı
+            projection_type='natural earth',  
+            showcoastlines=True,  
+            coastlinecolor="Black",  
+            lataxis_range=[-60, 85],  
+            lonaxis_range=[-180, 180], 
         ),
-)
-    #fig.update_yaxes(categoryorder="total ascending")
-    #fig.update_layout(
-        #font=dict(size=16),
-        #xaxis=dict(
-        #    gridwidth=1,
-        #    title_font=dict(size=18, color="red"),
-        #    tickfont=dict(size=14, color="black"),
-        #),
-        #yaxis=dict(
-        #    gridwidth=1,
-        #    title_font=dict(size=18, color="red"),
-        #    tickfont=dict(size=14, color="black"),
-        #),
-    #)
+    )
+
     return fig
 
 

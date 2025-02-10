@@ -1,10 +1,7 @@
 
-import numpy as np
 import pandas as pd
 import streamlit as st
-import plotly.express as px
 from modules.datacleaning import clean_data
-from modules import visualization as viz
 from modules import utilities as util
 
 st.set_page_config(

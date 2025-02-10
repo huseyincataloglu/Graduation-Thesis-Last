@@ -3,6 +3,7 @@ import numpy as np
 import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+import kaleido
 
 
 # Countries Page Plots
@@ -436,13 +437,13 @@ def plot_countrlocat_sankey(df,countries,years,locations):
             pad=20,
             thickness=15,
             label=all_nodes,
-            color=node_colors  # Her düğüme farklı renk atandı
+            color=node_colors  
         ),
         link=dict(
             source=sources,
             target=target,
             value=values,
-            color=[f"rgba(31, 119, 180, {op})" for op in link_opacity] # Bağlantıları saydam hale getirdik
+            color=[f"rgba(31, 119, 180, {op})" for op in link_opacity] 
         ))
     )
     fig.update_layout(

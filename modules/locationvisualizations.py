@@ -44,7 +44,6 @@ def plot_proddist_boxplotlocations(df,locations,years):
         ))
 
         fig.update_layout(
-            title=dict(text='Production Distribution by Location and Year'),
             xaxis=dict(
                 title='Years',
                 #titlefont=dict(color='red'),  # X ekseni başlık rengi

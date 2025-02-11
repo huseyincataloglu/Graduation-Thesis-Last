@@ -44,15 +44,15 @@ def plot_proddist_boxplotlocations(df,locations,years):
         ))
 
         fig.update_layout(
-            title=dict(text='Production Distribution by Location and Year',font=dict(size=14, color="black")),
+            title=dict(text='Production Distribution by Location and Year'),
             xaxis=dict(
                 title='Years',
-                titlefont=dict(color='red'),  # X ekseni başlık rengi
+                #titlefont=dict(color='red'),  # X ekseni başlık rengi
                 tickfont=dict(color='black')  # X ekseni işaretleme yazı rengi
             ),
             yaxis=dict(
                 title='Locations',
-                titlefont=dict(color='red'),  # Y ekseni başlık rengi
+                #titlefont=dict(color='red'),  # Y ekseni başlık rengi
                 tickfont=dict(color='black')  # Y ekseni işaretleme yazı rengi
             ),
             height=600,
@@ -713,7 +713,13 @@ def plot_groupedbarlocandmethod(df,locations,years,methods):
         df = df[df["Detail"].isin(methods)]
         grouped = df.groupby(["Location","Detail"])[years].sum().sum(axis = 1).reset_index(name ="Production")
 
-        fig = px.bar(grouped,x = "Location",y = "Production",color="Detail",title="Total Productions By Methods And Grouped Locations",barmode="group")
+        fig = px.bar(grouped,
+            x = "Location",
+            y = "Production",
+            color="Detail",
+            title="Total Productions By Methods And Grouped Locations",
+            barmode="group")
+        
         fig.update_layout(
             title=dict(font=dict(size=14, color="black")),  
             height=600,
